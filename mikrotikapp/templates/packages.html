@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Munialo Internet</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'mikrotikapp/css/styles.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>MUNIALO INTERNET</h1>
+        <p>Choose the perfect plan for your needs</p>
+      </div>
+
+      <div class="packages-grid">
+        {% for package in packages %}
+        <div class="package-card">
+          <h5>{{package.period_in_hours}} Hours</h5>
+          <p class="price">Ksh {{package.price}}</p>
+          <button
+            class="buy-button"
+            onclick="openModal('{{package.id}}', '{{package.price}}')"
+          >
+            Buy Now
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="paymentModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Enter M-Pesa Number</h2>
+        <form id="paymentForm">
+          <input type="hidden" id="packageId" name="packageId" />
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number:</label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              placeholder="e.g., 254712345678"
+              required
+            />
+            <small>Format: 254712345678 (without + or spaces)</small>
+          </div>
+          <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="text" id="amount" name="amount" readonly />
+          </div>
+          <button type="submit" class="submit-button">Submit Payment</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="{% static 'mikrotikapp/js/payment.js' %}"></script>
+  </body>
+</html>
