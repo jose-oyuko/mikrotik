@@ -7,12 +7,10 @@ from loguru import logger
 class PendingPayment(models.Model):
     phoneNumber = models.CharField(
         max_length=15,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number.')]
-    )
+       )
     macAddress = models.CharField(
         max_length=17,
-        validators=[RegexValidator(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$', 'Enter a valid MAC address.')]
-    )
+        )
     ipAddress = models.GenericIPAddressField()
     payed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
@@ -50,5 +48,9 @@ class Packages(models.Model):
     period_in_hours = models.IntegerField()
 
 class sessions(models.Model):
-    pass
-
+    mac_address = models.CharField(max_length=17)
+    package_amount = models.IntegerField()
+    starting_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=False, blank=False)
+    phone_number = models.CharField(max_length=15)
+    period = models.CharField(max_length=15)

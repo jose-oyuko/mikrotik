@@ -1,5 +1,10 @@
-from mikrotikapp.models import PendingPayment, PayedTransaction, Packages
+from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions
 from rest_framework import serializers
+
+class SessionsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = sessions
+        fields = '__all__'
 
 class PendingPaymentSerializer(serializers.ModelSerializer):
     class Meta:

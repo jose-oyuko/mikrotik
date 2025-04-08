@@ -29,7 +29,7 @@ class KopokopoService:
             logger.error(f"Failed to initialize Kopokopo service: {str(e)}")
             raise
 
-    def create_payment_request(self, amount, phone_number, description):
+    def create_payment_request(self, amount, phone_number):
         """
         Create a payment request using Kopokopo's API
         """
@@ -38,7 +38,6 @@ class KopokopoService:
                 till_number=self.till_number,
                 amount=amount,
                 phone_number=phone_number,
-                description=description,
                 callback_url=self.callback_url
             )
             return payment_request

@@ -135,3 +135,9 @@ KOPOKOPO = {
     'TILL_NUMBER': os.environ.get('KOPOKOPO_TILL_NUMBER', ''),
     'CALLBACK_URL': os.environ.get('KOPOKOPO_CALLBACK_URL', ''),
 }
+
+MIKROTIK = {
+    "MIKROTIK_IP" : os.environ.get("MIKROTIK_IP"),
+"MIKROTIK_USER" : os.environ.get("MIKROTIK_USER"),
+"MIKROTIK_PASS" : os.environ.get("MIKROTIK_PASS")
+}

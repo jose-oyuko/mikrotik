@@ -10,11 +10,42 @@ from django.shortcuts import render
 from .utils import save_transaction_to_json
 from datetime import datetime
 import json
+from .services.kopokopo import KopokopoService
+from .services.sessions import Sessions
+from .services.mikrotik import Miktotik
 
 class PendingPayment(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
     serializer_class = PendingPaymentSerializer
-    # stk push
+    
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                # initiate stk push
+                # payment = KopokopoService()
+                # payment.create_payment_request(amount=serializer.data["amount"], phone_number=serializer.data["phoneNumber"])
+                logger.info(f"Created pending payment: {serializer.data}")
+                return Response(
+                    {
+                        'message': 'Pending payment created successfully',
+                        'id': serializer.data['id']
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            logger.error(f"Validation errors: {serializer.errors}")
+            return Response(
+                {'error': 'Invalid data', 'details': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error creating pending payment: {str(e)}")
+            return Response(
+                {'error': 'Failed to create pending payment'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class PayedTransactions(generics.CreateAPIView):
     queryset = PayedTransaction.objects.all()
@@ -122,6 +153,8 @@ class PayedTransactions(generics.CreateAPIView):
                 )
 
             self.perform_create(serializer)
+            # pop pending, login the user
+            self.check_pending(transaction_data['sender_phone_number'])
             logger.info(f"Payment transaction processed successfully: {transaction_data['reference']}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -132,7 +165,7 @@ class PayedTransactions(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-    def check_user(self, phone_number):
+    def check_pending(self, phone_number, ):
         pass
 
 class PackegesList(generics.ListCreateAPIView):
@@ -144,5 +177,20 @@ class PackegesDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PackagesSerializer
 
 def packages(request):
+    # get form data
+    user_data = {
+    "mac" : request.form.get("mac"),
+    "ip" : request.form.get("ip"),
+    "username" : request.form.get("username"),
+    "link_login" : request.form.get("link-login"),
+    "link_login_only" : request.form.get("link-login-only"),
+    "link_orig" : request.form.get("link-orig"),
+    }
+    # check if session exists
+    session = Sessions.check_session(user_data['mac'])
+    if session:
+        Miktotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
+
+    
     packages = Packages.objects.all()
-    return render(request, 'packages.html', {'packages':packages})
+    return render(request, 'packages.html', {'packages':packages}, {"user_data":user_data})
