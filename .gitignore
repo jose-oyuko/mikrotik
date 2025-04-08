@@ -78,6 +78,7 @@ staticfiles/
 
 # Media files
 media/
+transactions/
 
 # Backup files
 *.bak

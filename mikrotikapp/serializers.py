@@ -1,27 +1,28 @@
-from mikrotikapp.models import PendingPayment, PayedTransactions, Packages
+from mikrotikapp.models import PendingPayment, PayedTransaction, Packages
 from rest_framework import serializers
 
 class PendingPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = PendingPayment
-        fields = ['id', 'phoneNumber', 'macAddress', 'ipAddress', 'payed', 'time', 'amount']
-        read_only_fields = ['id', 'time', 'payed']
-        
-    def validate_amount(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Amount must be greater than zero")
-        return value
+        fields = '__all__'
 
-class PayedTransactionsSerializer(serializers.ModelSerializer):
+class PayedTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PayedTransactions
-        fields = ['id', 'phoneNumber', 'timePayed', 'amountPayed', 'package', 'transaction_id']
-        read_only_fields = ['id', 'timePayed']
-        
-    def validate_amountPayed(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Amount must be greater than zero")
-        return value
+        model = PayedTransaction
+        fields = [
+            'transaction_id',
+            'reference',
+            'origination_time',
+            'sender_phone_number',
+            'amount',
+            'till_number',
+            'sender_first_name',
+            'sender_middle_name',
+            'sender_last_name',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 class PackagesSerializer(serializers.ModelSerializer):
     class Meta:
