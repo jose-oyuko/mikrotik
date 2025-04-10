@@ -1,6 +1,7 @@
-from serializers import SessionsSerializers
+# from .serializers import SessionsSerializers
+from mikrotikapp.serializers import SessionsSerializers
 from datetime import datetime, timedelta
-from models import sessions
+from mikrotikapp.models import sessions
 
 class Sessions():
     def add_session(self, mac_address, phone_number, period, package_amount):

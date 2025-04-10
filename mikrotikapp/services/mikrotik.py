@@ -33,6 +33,9 @@ class Miktotik():
             print("error while adding active is", e)
 
     def add_user(self, username, password, time):
+        isUser = self.user_exists(username)
+        if isUser:
+            return
         api = self.get_mt_api()
         api.get_resource('/ip/hotspot/user').call('add', {
             'name':username,

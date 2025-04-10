@@ -154,7 +154,7 @@ class PayedTransactions(generics.CreateAPIView):
 
             self.perform_create(serializer)
             # pop pending, login the user
-            self.check_pending(transaction_data['sender_phone_number'])
+            self.check_pending(transaction_data['sender_phone_number'], transaction_data['amount'])
             logger.info(f"Payment transaction processed successfully: {transaction_data['reference']}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -165,8 +165,55 @@ class PayedTransactions(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-    def check_pending(self, phone_number, ):
-        pass
+    def check_pending(self, phone_number, amount):
+        try:
+            # Check if there's a pending payment for this phone number and amount
+            pending_payment = PendingPayment.objects.filter(
+                phoneNumber=phone_number,
+                amount=amount,
+                payed=False
+            ).first()
+
+            if not pending_payment:
+                logger.info(f"No pending payment found for phone: {phone_number}, amount: {amount}")
+                return False
+
+            # Update payment status to paid
+            pending_payment.payed = True
+            pending_payment.save()
+            logger.info(f"Updated payment status for phone: {phone_number}")
+
+            # Get package details
+            package = Packages.objects.filter(price=amount).first()
+            if not package:
+                logger.error(f"No package found for amount: {amount}")
+                return False
+
+            # Add session for the user
+            session_service = Sessions()
+            session_service.add_session(
+                mac_address=pending_payment.macAddress,
+                phone_number=phone_number,
+                period=package.period_in_hours,
+                package_amount=amount
+            )
+            logger.info(f"Added session for phone: {phone_number}")
+
+            # Check and return session details
+            session_details = session_service.check_session(pending_payment.macAddress)
+            if session_details:
+                logger.info(f"Session details retrieved for phone: {phone_number}")
+                mikrotik = Miktotik()
+                mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                return 
+
+            logger.error(f"Failed to retrieve session details for phone: {phone_number}")
+            return False
+
+        except Exception as e:
+            logger.error(f"Error in check_pending: {str(e)}")
+            return False
 
 class PackegesList(generics.ListCreateAPIView):
     queryset = Packages.objects.all()

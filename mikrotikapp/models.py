@@ -5,12 +5,8 @@ from loguru import logger
 
 # Create your models here.
 class PendingPayment(models.Model):
-    phoneNumber = models.CharField(
-        max_length=15,
-       )
-    macAddress = models.CharField(
-        max_length=17,
-        )
+    phoneNumber = models.CharField(max_length=15)
+    macAddress = models.CharField(max_length=17)
     ipAddress = models.GenericIPAddressField()
     payed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
