@@ -3,9 +3,7 @@ from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSe
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from django.core.exceptions import ObjectDoesNotExist
 from loguru import logger
-from django.http import HttpResponse
 from django.shortcuts import render
 from .utils import save_transaction_to_json
 from datetime import datetime

@@ -2,6 +2,45 @@ import k2connect
 from django.conf import settings
 from loguru import logger
 
+CLIENT_SECRET = settings.KOPOKOPO['CLIENT_SECRET']
+API_KEY = settings.KOPOKOPO['API_KEY']
+CLIENT_ID = settings.KOPOKOPO['CLIENT_ID']
+BASE_URL = settings.KOPOKOPO['BASE_URL']
+TILL_NUMBER = settings.KOPOKOPO['TILL_NUMBER']
+
+
+class Kopokop:
+    def authorization(self):
+        k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
+        token_service = k2connect.Tokens
+        access_token_request = token_service.request_access_token()
+        access_token = token_service.get_access_token(access_token_request)
+        print(f" the access token is {access_token}")
+        print(f"Access_token_request is {access_token_request}")
+        return access_token
+    
+    def stk_push(self, amount, phone_number):
+    # Using Kopo Kopo Connect - https://github.com/kopokopo/k2-connect-python (Recommended)
+        k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
+        stk_service = k2connect.ReceivePayments
+
+        request_body ={
+        "access_token": self.authorization(),
+        "callback_url": "https://webhook.site/52fd1913-778e-4ee1-bdc4-74517abb758d",
+        "payment_channel": "MPESA",
+        "phone_number": phone_number,
+        "till_number": TILL_NUMBER,
+        "amount": amount,
+        "first_name": "python_first_name",
+        "last_name": "python_last_name",
+        "email": "john.doe@gmail.com",
+        }
+
+        stk_push_location = stk_service.create_payment_request(request_body)
+        stk_push_location # => 'https://sandbox.kopokopo.com/api/v1/incoming_payments/247b1bd8-f5a0-4b71-a898-f62f67b8ae1c'
+        print(f"stk_push_location is {stk_push_location} and is of type {type(stk_push_location)}")
+
+
 class KopokopoService:
     def __init__(self):
         try:

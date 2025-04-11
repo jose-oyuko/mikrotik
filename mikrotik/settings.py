@@ -128,11 +128,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # .env
 KOPOKOPO = {
-    'CLIENT_SECRET': os.environ.get('KOPOKOPO_CLIENT_SECRET', ''),
-    'API_KEY': os.environ.get('KOPOKOPO_API_KEY', ''),
-    'CLIENT_ID': os.environ.get('KOPOKOPO_CLIENT_ID', ''),
-    'BASE_URL': os.environ.get('KOPOKOPO_BASE_URL', 'https://api.kopokopo.com'),
-    'TILL_NUMBER': os.environ.get('KOPOKOPO_TILL_NUMBER', ''),
+    'CLIENT_SECRET': os.environ.get('CLIENT_SECRET'),
+    'API_KEY': os.environ.get('API_KEY'),
+    'CLIENT_ID': os.environ.get('CLIENT_ID'),
+    'BASE_URL': os.environ.get('BASE_URL',),
+    'TILL_NUMBER': os.environ.get('TILL_NUMBER'),
     'CALLBACK_URL': os.environ.get('KOPOKOPO_CALLBACK_URL', ''),
 }
 
