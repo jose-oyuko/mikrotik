@@ -9,8 +9,10 @@ from .utils import save_transaction_to_json
 from datetime import datetime
 import json
 from .services.kopokopo import KopokopoService
-from .services.sessions import Sessions
+from .services.sessions import SessionsService
 from .services.mikrotik import Miktotik
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
 class PendingPayment(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
@@ -188,7 +190,7 @@ class PayedTransactions(generics.CreateAPIView):
                 return False
 
             # Add session for the user
-            session_service = Sessions()
+            session_service = SessionsService()
             session_service.add_session(
                 mac_address=pending_payment.macAddress,
                 phone_number=phone_number,
@@ -221,21 +223,30 @@ class PackegesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Packages.objects.all()
     serializer_class = PackagesSerializer
 
+@csrf_exempt
+@require_http_methods(["POST"])
 def packages(request):
     # get form data
     user_data = {
-    "mac" : request.form.get("mac"),
-    "ip" : request.form.get("ip"),
-    "username" : request.form.get("username"),
-    "link_login" : request.form.get("link-login"),
-    "link_login_only" : request.form.get("link-login-only"),
-    "link_orig" : request.form.get("link-orig"),
+    "mac" : request.POST.get("mac"),
+    "ip" : request.POST.get("ip"),
+    "username" : request.POST.get("username"),
+    "link_login" : request.POST.get("link-login"),
+    "link_login_only" : request.POST.get("link-login-only"),
+    "link_orig" : request.POST.get("link-orig"),
     }
     # check if session exists
-    session = Sessions.check_session(user_data['mac'])
+    print(f"the mac address is {user_data['mac']}")
+    session_service = SessionsService()
+    session = session_service.check_session(mac_address=user_data['mac'])
     if session:
         Miktotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
 
     
     packages = Packages.objects.all()
-    return render(request, 'packages.html', {'packages':packages}, {"user_data":user_data})
+
+    context = {
+        'packages': packages,
+        'user_data': user_data
+    }
+    return render(request, 'packages.html', context)

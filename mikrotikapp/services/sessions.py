@@ -3,7 +3,7 @@ from mikrotikapp.serializers import SessionsSerializers
 from datetime import datetime, timedelta
 from mikrotikapp.models import sessions
 
-class Sessions():
+class SessionsService():
     def add_session(self, mac_address, phone_number, period, package_amount):
         # Calculate end time by adding period (in hours) to current time
         end_time = datetime.now() + timedelta(hours=period)
