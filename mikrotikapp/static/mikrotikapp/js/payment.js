@@ -29,6 +29,12 @@ document
 
     const phoneNumber = document.getElementById("phoneNumber").value;
     const amount = document.getElementById("amount").value;
+    const macAddress = document.getElementById("macAddress").value;
+    const ipAddress = document.getElementById("ipAddress").value;
+    const username = document.getElementById("username").value;
+    const linkLogin = document.getElementById("linkLogin").value;
+    const linkLoginOnly = document.getElementById("linkLoginOnly").value;
+    const linkOrig = document.getElementById("linkOrig").value;
 
     try {
       const response = await fetch("/api/pending/", {
@@ -39,8 +45,12 @@ document
         body: JSON.stringify({
           phoneNumber: phoneNumber,
           amount: amount,
-          macAddress: "00:11:22:33:44:55", // Hardcoded for now
-          ipAddress: "192.168.1.100", // Hardcoded for now
+          macAddress: macAddress,
+          ipAddress: ipAddress,
+          username: username,
+          linkLogin: linkLogin,
+          linkLoginOnly: linkLoginOnly,
+          linkOrig: linkOrig,
         }),
       });
 

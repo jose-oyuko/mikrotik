@@ -41,6 +41,42 @@
         <h2>Enter M-Pesa Number</h2>
         <form id="paymentForm">
           <input type="hidden" id="packageId" name="packageId" />
+          <input
+            type="hidden"
+            id="macAddress"
+            name="macAddress"
+            value="{{ user_data.mac }}"
+          />
+          <input
+            type="hidden"
+            id="ipAddress"
+            name="ipAddress"
+            value="{{ user_data.ip }}"
+          />
+          <input
+            type="hidden"
+            id="username"
+            name="username"
+            value="{{ user_data.username }}"
+          />
+          <input
+            type="hidden"
+            id="linkLogin"
+            name="linkLogin"
+            value="{{ user_data.link_login }}"
+          />
+          <input
+            type="hidden"
+            id="linkLoginOnly"
+            name="linkLoginOnly"
+            value="{{ user_data.link_login_only }}"
+          />
+          <input
+            type="hidden"
+            id="linkOrig"
+            name="linkOrig"
+            value="{{ user_data.link_orig }}"
+          />
           <div class="form-group">
             <label for="phoneNumber">Phone Number:</label>
             <input

@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'your-secret-key-here')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['http://munialo.net', '192.168.88.251']
+ALLOWED_HOSTS = ['http://munialo.net', '192.168.88.251', '127.0.0.1']
 
 
 # Application definition

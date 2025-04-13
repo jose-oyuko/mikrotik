@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Package Management</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'mikrotikapp/css/admin.css' %}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="admin-container">
+      <header class="admin-header">
+        <div class="header-left">
+          <h1>Package Management</h1>
+          <p>Welcome, {{ user.username }}</p>
+        </div>
+        <div class="header-right">
+          <button
+            class="logout-btn"
+            onclick="window.location.href='{% url 'logout' %}'"
+          >
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+          <button class="add-package-btn" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Add New Package
+          </button>
+        </div>
+      </header>
+
+      <div class="packages-table-container">
+        <table class="packages-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Period</th>
+              <th>Price (Ksh)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for package in packages %}
+            <tr>
+              <td>{{ package.id }}</td>
+              <td>{{ package.period_in_hours }} hours</td>
+              <td>{{ package.price }}</td>
+              <td class="actions">
+                <button
+                  class="edit-btn"
+                  onclick="openEditModal('{{ package.id }}', '{{ package.period_in_hours }}', '{{ package.price }}')"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="delete-btn"
+                  onclick="deletePackage('{{ package.id }}')"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add/Edit Package Modal -->
+      <div id="packageModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2 id="modalTitle">Add New Package</h2>
+          <form id="packageForm">
+            <input type="hidden" id="packageId" />
+            <div class="form-group">
+              <label for="period">Period:</label>
+              <div class="period-input-group">
+                <input
+                  type="number"
+                  id="periodValue"
+                  name="periodValue"
+                  required
+                />
+                <select id="periodUnit" name="periodUnit">
+                  <option value="hours">Hours</option>
+                  <option value="days">Days</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="price">Price (Ksh):</label>
+              <input type="number" id="price" name="price" required />
+            </div>
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" onclick="closeModal()">
+                Cancel
+              </button>
+              <button type="submit" class="save-btn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'mikrotikapp/js/admin.js' %}"></script>
+  </body>
+</html>

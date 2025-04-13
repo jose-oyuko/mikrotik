@@ -3,8 +3,13 @@ from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSe
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from loguru import logger
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .utils import save_transaction_to_json
 from datetime import datetime
 import json
@@ -218,10 +223,39 @@ class PayedTransactions(generics.CreateAPIView):
 class PackegesList(generics.ListCreateAPIView):
     queryset = Packages.objects.all()
     serializer_class = PackagesSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
 class PackegesDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Packages.objects.all()
     serializer_class = PackagesSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('admin-packages')
+        
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            next_url = request.GET.get('next', 'admin-packages')
+            return redirect(next_url)
+        else:
+            return render(request, 'login.html', {'form': {'errors': True}})
+    return render(request, 'login.html')
+
+@login_required(login_url='/login/')
+def admin_packages(request):
+    packages = Packages.objects.all()
+    return render(request, 'admin.html', {'packages': packages})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 @csrf_exempt
 @require_http_methods(["POST"])
