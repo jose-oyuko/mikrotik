@@ -18,8 +18,10 @@ from .services.sessions import SessionsService
 from .services.mikrotik import Miktotik
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.db import models
+import re
 
-class PendingPayment(generics.CreateAPIView):
+class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
     serializer_class = PendingPaymentSerializer
     
@@ -145,6 +147,13 @@ class PayedTransactions(generics.CreateAPIView):
                 'sender_last_name': resource.get('sender_last_name'),
             }
 
+            # Process phone number to get last 9 digits before checking pending
+            phone_number = transaction_data['sender_phone_number']
+            if phone_number:
+                digits = re.sub(r'\D', '', phone_number)
+                processed_phone = digits[-9:] if len(digits) >= 9 else digits
+                transaction_data['sender_phone_number'] = processed_phone
+
             # Log the prepared transaction data
             logger.debug(f"Prepared transaction data: {json.dumps(transaction_data, indent=2, default=str)}")
 
@@ -159,7 +168,7 @@ class PayedTransactions(generics.CreateAPIView):
 
             self.perform_create(serializer)
             # pop pending, login the user
-            self.check_pending(transaction_data['sender_phone_number'], transaction_data['amount'])
+            self.check_pending(processed_phone, transaction_data['amount'])
             logger.info(f"Payment transaction processed successfully: {transaction_data['reference']}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -126,6 +126,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Login URL configuration
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/admin/packages/'
+LOGOUT_REDIRECT_URL = '/login/'
+
 # .env
 KOPOKOPO = {
     'CLIENT_SECRET': os.environ.get('CLIENT_SECRET'),
@@ -138,6 +143,6 @@ KOPOKOPO = {
 
 MIKROTIK = {
     "MIKROTIK_IP" : os.environ.get("MIKROTIK_IP"),
-"MIKROTIK_USER" : os.environ.get("MIKROTIK_USER"),
-"MIKROTIK_PASS" : os.environ.get("MIKROTIK_PASS")
+    "MIKROTIK_USER" : os.environ.get("MIKROTIK_USER"),
+    "MIKROTIK_PASS" : os.environ.get("MIKROTIK_PASS")
 }

@@ -2,10 +2,11 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from loguru import logger
+from .fields import LastNineDigitsPhoneField
 
 # Create your models here.
 class PendingPayment(models.Model):
-    phoneNumber = models.CharField(max_length=15)
+    phoneNumber = LastNineDigitsPhoneField(max_length=9)
     macAddress = models.CharField(max_length=17)
     ipAddress = models.GenericIPAddressField()
     payed = models.BooleanField(default=False)
@@ -24,7 +25,7 @@ class PayedTransaction(models.Model):
     transaction_id = models.CharField(max_length=36, unique=True)  # Kopokopo ID
     reference = models.CharField(max_length=20)  # Kopokopo reference
     origination_time = models.DateTimeField()
-    sender_phone_number = models.CharField(max_length=15)
+    sender_phone_number = LastNineDigitsPhoneField(max_length=9)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     till_number = models.CharField(max_length=10)
     sender_first_name = models.CharField(max_length=100, null=True, blank=True)
@@ -48,5 +49,5 @@ class sessions(models.Model):
     package_amount = models.IntegerField()
     starting_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=False, blank=False)
-    phone_number = models.CharField(max_length=15)
+    phone_number = LastNineDigitsPhoneField(max_length=9)
     period = models.CharField(max_length=15)
