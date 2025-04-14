@@ -285,7 +285,9 @@ def packages(request):
     session_service = SessionsService()
     session = session_service.check_session(mac_address=user_data['mac'])
     if session:
-        Miktotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
+        mikrotik = Miktotik()
+        mikrotik.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
+        mikrotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
 
     
     packages = Packages.objects.all()
