@@ -13,6 +13,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('', views.packages, name='packages'),
+    path('admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin/change-password/', views.change_password, name='change_password'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

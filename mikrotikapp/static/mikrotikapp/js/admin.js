@@ -21,30 +21,20 @@ function getCookie(name) {
 
 // Function to open the add package modal
 function openAddModal() {
-  modalTitle.textContent = "Add New Package";
+  document.getElementById("modalTitle").textContent = "Add New Package";
   document.getElementById("packageId").value = "";
   document.getElementById("periodValue").value = "";
-  document.getElementById("periodUnit").value = "hours";
   document.getElementById("price").value = "";
-  modal.style.display = "block";
+  new bootstrap.Modal(document.getElementById("packageModal")).show();
 }
 
 // Function to open the edit package modal
 function openEditModal(id, period, price) {
-  modalTitle.textContent = "Edit Package";
+  document.getElementById("modalTitle").textContent = "Edit Package";
   document.getElementById("packageId").value = id;
-
-  // Convert hours to days if applicable
-  if (period >= 24 && period % 24 === 0) {
-    document.getElementById("periodValue").value = period / 24;
-    document.getElementById("periodUnit").value = "days";
-  } else {
-    document.getElementById("periodValue").value = period;
-    document.getElementById("periodUnit").value = "hours";
-  }
-
+  document.getElementById("periodValue").value = period;
   document.getElementById("price").value = price;
-  modal.style.display = "block";
+  new bootstrap.Modal(document.getElementById("packageModal")).show();
 }
 
 // Function to close the modal
@@ -110,31 +100,21 @@ packageForm.addEventListener("submit", async function (e) {
 });
 
 // Function to delete a package
-async function deletePackage(id) {
-  if (!confirm("Are you sure you want to delete this package?")) {
-    return;
-  }
-
-  try {
-    const csrfToken = getCookie("csrftoken");
-    const response = await fetch(`/api/packages/${id}/`, {
+function deletePackage(id) {
+  if (confirm("Are you sure you want to delete this package?")) {
+    fetch(`/api/packages/${id}/`, {
       method: "DELETE",
       headers: {
-        "X-CSRFToken": csrfToken,
+        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+          .value,
       },
-      credentials: "include",
+    }).then((response) => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert("Error deleting package");
+      }
     });
-
-    if (response.ok) {
-      // Reload the page to show updated data
-      window.location.reload();
-    } else {
-      const data = await response.json();
-      alert("Error: " + (data.error || "Failed to delete package"));
-    }
-  } catch (error) {
-    alert("Error deleting package. Please try again.");
-    console.error("Error:", error);
   }
 }
 
@@ -142,5 +122,37 @@ async function deletePackage(id) {
 window.addEventListener("click", function (event) {
   if (event.target === modal) {
     closeModal();
+  }
+});
+
+// Initialize package form submission handler
+document.addEventListener("DOMContentLoaded", function () {
+  const packageForm = document.getElementById("packageForm");
+  if (packageForm) {
+    packageForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const id = document.getElementById("packageId").value;
+      const url = id ? `/api/packages/${id}/` : "/api/packages/";
+      const method = id ? "PUT" : "POST";
+
+      fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+            .value,
+        },
+        body: JSON.stringify({
+          period_in_hours: document.getElementById("periodValue").value,
+          price: document.getElementById("price").value,
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Error saving package");
+        }
+      });
+    });
   }
 });

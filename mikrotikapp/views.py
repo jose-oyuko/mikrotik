@@ -7,7 +7,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from loguru import logger
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .utils import save_transaction_to_json
@@ -20,6 +20,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 import re
+from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
 
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
@@ -293,3 +295,23 @@ def packages(request):
         'user_data': user_data
     }
     return render(request, 'packages.html', context)
+
+@login_required(login_url='/login/')
+def admin_dashboard(request):
+    packages = Packages.objects.all()
+    return render(request, 'admin.html', {'packages': packages})
+
+@login_required(login_url='/login/')
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('admin_dashboard')
+        else:
+            # Combine all errors into a single message
+            error_message = ' '.join([f'{field}: {error}' for field, errors in form.errors.items() for error in errors])
+            messages.error(request, error_message)
+    return redirect('admin_dashboard')
