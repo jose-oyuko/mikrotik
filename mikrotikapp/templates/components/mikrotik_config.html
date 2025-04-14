@@ -1,0 +1,80 @@
+<!-- Mikrotik Configuration Component -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h5 class="mb-0">Mikrotik Configuration</h5>
+  </div>
+  <div class="card-body">
+    <form id="mikrotikConfigForm">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="mikrotikIp" class="form-label">Mikrotik IP</label>
+            <input
+              type="text"
+              class="form-control"
+              id="mikrotikIp"
+              name="mikrotik_ip"
+              value="{{ settings.MIKROTIK.MIKROTIK_IP }}"
+              required
+            />
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="mikrotikUser" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="mikrotikUser"
+              name="mikrotik_user"
+              value="{{ settings.MIKROTIK.MIKROTIK_USER }}"
+              required
+            />
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="mikrotikPass" class="form-label">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="mikrotikPass"
+              name="mikrotik_pass"
+              value="{{ settings.MIKROTIK.MIKROTIK_PASS }}"
+              required
+            />
+          </div>
+        </div>
+      </div>
+      <div class="text-end">
+        <button type="submit" class="btn btn-primary">
+          Save Configuration
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Connection Test Modal -->
+<div class="modal fade" id="connectionTestModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Test Connection</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div id="connectionStatus" class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Testing connection...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

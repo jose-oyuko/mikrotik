@@ -1,0 +1,97 @@
+<!-- Packages CRUD Component -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Packages</h5>
+    <button
+      type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#addPackageModal"
+    >
+      <i class="fas fa-plus"></i> Add Package
+    </button>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Price</th>
+            <th>Period (Hours)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for package in packages %}
+          <tr>
+            <td>{{ package.price }}</td>
+            <td>{{ package.period_in_hours }}</td>
+            <td>
+              <button
+                class="btn btn-sm btn-info edit-package"
+                data-id="{{ package.id }}"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-danger delete-package"
+                data-id="{{ package.id }}"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Package Modal -->
+<div class="modal fade" id="addPackageModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Package</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="packageForm">
+          <div class="mb-3">
+            <label for="packagePrice" class="form-label">Price</label>
+            <input
+              type="number"
+              class="form-control"
+              id="packagePrice"
+              name="price"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="packagePeriod" class="form-label">Period (Hours)</label>
+            <input
+              type="number"
+              class="form-control"
+              id="packagePeriod"
+              name="period_in_hours"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="button" class="btn btn-primary" id="savePackage">
+          Save Package
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
