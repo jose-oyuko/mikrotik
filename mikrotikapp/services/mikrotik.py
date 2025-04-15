@@ -11,6 +11,9 @@ class MikrotikConfigError(Exception):
     pass
 
 class Mikrotik:
+    class ReAddUserError(Exception):
+        pass
+
     def __init__(self):
         self._validate_config()
         self.mikrotik_ip = settings.MIKROTIK['MIKROTIK_IP']
@@ -99,14 +102,6 @@ class Mikrotik:
     def login_user(self, mac, ip):
         logger.info(f"Attempting to login user - MAC: {mac}, IP: {ip}")
         try:
-            # Check if user exists and handle expiration
-            if self.user_exists(mac):
-                logger.debug(f"User {mac} exists, proceeding to login")
-            else:
-                logger.debug(f"User {mac} does not exist, adding before login")
-                raise Exception("re_add_user")
-                # self.add_user(mac, mac, '2h30m')  # Default time limit
-            
             api = self.get_mt_api()
             api.get_resource('/ip/hotspot/active').call('login', {
                 'user': mac,
@@ -116,35 +111,14 @@ class Mikrotik:
             })
             logger.success(f"User successfully logged in - MAC: {mac}, IP: {ip}")
             return redirect("https://google.com")
-        except routeros_api.exceptions.RouterOsApiCommunicationError as e:
-            if "your uptime limit is reached" in str(e).lower():
-                logger.warning(f"Uptime limit reached for user {mac}, removing and retrying")
-                try:
-                    api = self.get_mt_api()
-                    user_resource = api.get_resource('/ip/hotspot/user')
-                    existing_users = user_resource.get(name=mac)
-                    if existing_users:
-                        user_resource.call('remove', {'numbers': existing_users[0]['id']})
-                        logger.info(f"Removed expired user: {mac}")
-                    
-                    raise Exception("re_add_user")
-                    # Re-add user
-                    # self.add_user(mac, mac, '2h30m')
-                    
-                    # Retry login
-                    # api.get_resource('/ip/hotspot/active').call('login', {
-                    #     'user': mac,
-                    #     'password': mac,
-                    #     'mac-address': mac,
-                    #     'ip': ip
-                    # })
-                    # logger.success(f"User successfully logged in after retry - MAC: {mac}, IP: {ip}")
-                    # return redirect("https://google.com")
-                except Exception as retry_e:
-                    logger.error(f"Retry failed for user {mac}. Error: {str(retry_e)}")
-                    raise
-            logger.error(f"Failed to login user - MAC: {mac}, IP: {ip}. Error: {str(e)}")
-            raise
         except Exception as e:
-            logger.error(f"Failed to login user - MAC: {mac}, IP: {ip}. Error: {str(e)}")
+            error_message = str(e)
+            if "user uptime reached" in error_message.lower():
+                logger.warning(f"User uptime limit reached - MAC: {mac}, IP: {ip}")
+            elif "no such user" in error_message.lower():
+                logger.warning(f"User not found on router - MAC: {mac}, IP: {ip}")
+            elif "connection refused" in error_message.lower():
+                logger.error(f"Router connection refused - MAC: {mac}, IP: {ip}")
+            else:
+                logger.error(f"Login failed - MAC: {mac}, IP: {ip}, Error: {error_message}")
             raise

@@ -16,12 +16,14 @@ import json
 from .services.kopokopo import KopokopoService
 from .services.sessions import SessionsService
 from .services.mikrotik import Mikrotik
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 import re
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
+from django.http import StreamingHttpResponse
+import time
 
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
@@ -223,10 +225,9 @@ class PayedTransactions(generics.CreateAPIView):
                 mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
                 try:
                     mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
-                except Exception as e:
-                    if "re_add_user" in str(e).lower():
-                        mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
-                        mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                except Mikrotik.ReAddUserError:
+                    mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                    mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
 
                 return 
 
@@ -323,3 +324,21 @@ def change_password(request):
             error_message = ' '.join([f'{field}: {error}' for field, errors in form.errors.items() for error in errors])
             messages.error(request, error_message)
     return redirect('admin_dashboard')
+
+@csrf_exempt
+@require_GET
+def payment_status_stream(request, mac_address):
+    def event_stream():
+        while True:
+            session_service = SessionsService()
+            session = session_service.check_session(mac_address)
+            if session:
+                yield f"data: {json.dumps({'status': 'success', 'link_orig': session.get('link_orig', 'https://google.com')})}\n\n"
+                break
+            yield "data: {}\n\n"
+            time.sleep(2)  # Check every 2 seconds
+    
+    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+    response['Cache-Control'] = 'no-cache'
+    response['X-Accel-Buffering'] = 'no'
+    return response

@@ -21,51 +21,86 @@ window.onclick = function (event) {
   }
 };
 
-// Handle form submission
-document
-  .getElementById("paymentForm")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const phoneNumber = document.getElementById("phoneNumber").value;
-    const amount = document.getElementById("amount").value;
-    const macAddress = document.getElementById("macAddress").value;
-    const ipAddress = document.getElementById("ipAddress").value;
-    const username = document.getElementById("username").value;
-    const linkLogin = document.getElementById("linkLogin").value;
-    const linkLoginOnly = document.getElementById("linkLoginOnly").value;
-    const linkOrig = document.getElementById("linkOrig").value;
-
-    try {
-      const response = await fetch("/api/pending/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber,
-          amount: amount,
-          macAddress: macAddress,
-          ipAddress: ipAddress,
-          username: username,
-          linkLogin: linkLogin,
-          linkLoginOnly: linkLoginOnly,
-          linkOrig: linkOrig,
-        }),
-      });
-
-      if (response.ok) {
-        alert(
-          "Payment request submitted successfully! Please check your phone for the M-Pesa prompt."
-        );
-        modal.style.display = "none";
-        document.getElementById("paymentForm").reset();
-      } else {
-        const data = await response.json();
-        alert("Error: " + (data.error || "Failed to submit payment request"));
+// Function to get CSRF token from cookies
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
-    } catch (error) {
-      alert("Error submitting payment request. Please try again.");
-      console.error("Error:", error);
     }
-  });
+  }
+  return cookieValue;
+}
+
+// Function to start session check
+function startSessionCheck(macAddress) {
+  const eventSource = new EventSource(`/api/payment-status/${macAddress}/`);
+
+  eventSource.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    if (data.status === "success") {
+      eventSource.close();
+      window.location.href = data.link_orig;
+    }
+  };
+
+  eventSource.onerror = function (error) {
+    console.error("EventSource failed:", error);
+    eventSource.close();
+  };
+}
+
+// Handle form submission
+document.getElementById("paymentForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const data = {
+    phoneNumber: formData.get("phoneNumber"),
+    amount: formData.get("amount"),
+    macAddress: formData.get("macAddress"),
+    ipAddress: formData.get("ipAddress"),
+    username: formData.get("username"),
+    linkLogin: formData.get("linkLogin"),
+    linkLoginOnly: formData.get("linkLoginOnly"),
+    linkOrig: formData.get("linkOrig"),
+  };
+
+  fetch("/api/pending/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then((err) => {
+          throw err;
+        });
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // Close the modal
+      modal.style.display = "none";
+      // Show success message
+      alert(
+        "Payment request sent successfully! Please check your phone for the M-Pesa prompt."
+      );
+      // Start checking for active session
+      startSessionCheck(data.macAddress);
+      // Reset form
+      document.getElementById("paymentForm").reset();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error: " + (error.error || "Failed to submit payment request"));
+    });
+});

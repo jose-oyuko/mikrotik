@@ -10,6 +10,26 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{% static 'mikrotikapp/css/styles.css' %}" />
+    <script>
+      function startSessionCheck(macAddress) {
+        const eventSource = new EventSource(
+          `/api/payment-status/${macAddress}/`
+        );
+
+        eventSource.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          if (data.status === "success") {
+            eventSource.close();
+            window.location.href = data.link_orig;
+          }
+        };
+
+        eventSource.onerror = function (error) {
+          console.error("EventSource failed:", error);
+          eventSource.close();
+        };
+      }
+    </script>
   </head>
   <body>
     <div class="container">
