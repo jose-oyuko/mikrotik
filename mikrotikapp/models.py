@@ -41,8 +41,15 @@ class PayedTransaction(models.Model):
         ordering = ['-origination_time']
 
 class Packages(models.Model):
-    price = models.IntegerField()
-    period_in_hours = models.IntegerField()
+    period_in_minutes = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        minutes = self.period_in_minutes
+        if minutes % 60 == 0:  # If minutes is a multiple of 60
+            return f"{minutes // 60} hours"
+        else:
+            return f"{minutes} minutes"
 
 class sessions(models.Model):
     mac_address = models.CharField(max_length=17)

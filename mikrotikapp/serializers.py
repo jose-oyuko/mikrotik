@@ -53,4 +53,17 @@ class PayedTransactionSerializer(serializers.ModelSerializer):
 class PackagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Packages
-        fields = '__all__'
+        fields = ['id', 'period_in_minutes', 'price']
+
+    def validate(self, data):
+        # Ensure period_in_minutes is provided
+        if not data.get('period_in_minutes'):
+            raise serializers.ValidationError("period_in_minutes must be provided")
+        return data
+
+    def to_representation(self, instance):
+        """Convert the instance to a representation"""
+        ret = super().to_representation(instance)
+        # Add a human-readable period display
+        ret['period_display'] = str(instance)
+        return ret

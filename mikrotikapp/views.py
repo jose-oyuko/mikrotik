@@ -15,7 +15,7 @@ from datetime import datetime
 import json
 from .services.kopokopo import KopokopoService
 from .services.sessions import SessionsService
-from .services.mikrotik import Miktotik
+from .services.mikrotik import Mikrotik
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
@@ -210,7 +210,7 @@ class PayedTransactions(generics.CreateAPIView):
             session_service.add_session(
                 mac_address=pending_payment.macAddress,
                 phone_number=phone_number,
-                period=package.period_in_hours,
+                period=package.period_in_minutes,
                 package_amount=amount
             )
             logger.info(f"Added session for phone: {phone_number}")
@@ -219,9 +219,15 @@ class PayedTransactions(generics.CreateAPIView):
             session_details = session_service.check_session(pending_payment.macAddress)
             if session_details:
                 logger.info(f"Session details retrieved for phone: {phone_number}")
-                mikrotik = Miktotik()
+                mikrotik = Mikrotik()
                 mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
-                mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                try:
+                    mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                except Exception as e:
+                    if "re_add_user" in str(e).lower():
+                        mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                        mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+
                 return 
 
             logger.error(f"Failed to retrieve session details for phone: {phone_number}")
@@ -285,7 +291,7 @@ def packages(request):
     session_service = SessionsService()
     session = session_service.check_session(mac_address=user_data['mac'])
     if session:
-        mikrotik = Miktotik()
+        mikrotik = Mikrotik()
         mikrotik.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
         mikrotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
 

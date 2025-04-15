@@ -17,7 +17,7 @@
         <thead>
           <tr>
             <th>Price</th>
-            <th>Period (Hours)</th>
+            <th>Period</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -25,11 +25,13 @@
           {% for package in packages %}
           <tr>
             <td>{{ package.price }}</td>
-            <td>{{ package.period_in_hours }}</td>
+            <td>{{ package }}</td>
             <td>
               <button
                 class="btn btn-sm btn-info edit-package"
                 data-id="{{ package.id }}"
+                data-price="{{ package.price }}"
+                data-minutes="{{ package.period_in_minutes }}"
               >
                 <i class="fas fa-edit"></i>
               </button>
@@ -69,19 +71,37 @@
               class="form-control"
               id="packagePrice"
               name="price"
+              step="0.01"
               required
             />
           </div>
           <div class="mb-3">
-            <label for="packagePeriod" class="form-label">Period (Hours)</label>
-            <input
-              type="number"
-              class="form-control"
-              id="packagePeriod"
-              name="period_in_hours"
-              required
-            />
+            <label for="durationValue" class="form-label">Duration</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                id="durationValue"
+                name="duration_value"
+                min="1"
+                required
+              />
+              <select
+                class="form-select"
+                id="durationUnit"
+                name="duration_unit"
+              >
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
           </div>
+          <input
+            type="hidden"
+            id="period_in_minutes"
+            name="period_in_minutes"
+          />
         </form>
       </div>
       <div class="modal-footer">

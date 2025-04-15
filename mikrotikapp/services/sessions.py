@@ -7,10 +7,10 @@ from loguru import logger
 
 class SessionsService():
     def add_session(self, mac_address, phone_number, period, package_amount):
-        logger.info(f"Attempting to add new session - MAC: {mac_address}, Phone: {phone_number}, Period: {period} hours, Amount: {package_amount}")
+        logger.info(f"Attempting to add new session - MAC: {mac_address}, Phone: {phone_number}, Period: {period} minutes, Amount: {package_amount}")
         
         # Use timezone.now() instead of datetime.now() to ensure timezone awareness
-        end_time = timezone.now() + timedelta(hours=period)
+        end_time = timezone.now() + timedelta(minutes=period)
         
         session_data = {
             "mac_address": mac_address,
