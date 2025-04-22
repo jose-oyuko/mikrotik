@@ -7,38 +7,49 @@ API_KEY = settings.KOPOKOPO['API_KEY']
 CLIENT_ID = settings.KOPOKOPO['CLIENT_ID']
 BASE_URL = settings.KOPOKOPO['BASE_URL']
 TILL_NUMBER = settings.KOPOKOPO['TILL_NUMBER']
+MY_BASE_URL = settings.MY_BASE_URL
 
 
-class Kopokop:
+class Kopokopo:
     def authorization(self):
-        k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
-        token_service = k2connect.Tokens
-        access_token_request = token_service.request_access_token()
-        access_token = token_service.get_access_token(access_token_request)
-        print(f" the access token is {access_token}")
-        print(f"Access_token_request is {access_token_request}")
-        return access_token
+        try:
+            logger.info("Initializing Kopokopo authorization")
+            k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
+            token_service = k2connect.Tokens
+            access_token_request = token_service.request_access_token()
+            access_token = token_service.get_access_token(access_token_request)
+            
+            logger.info("Successfully obtained access token")
+            return access_token
+        except Exception as e:
+            logger.error(f"Failed to obtain authorization token: {str(e)}")
+            raise
     
     def stk_push(self, amount, phone_number):
-    # Using Kopo Kopo Connect - https://github.com/kopokopo/k2-connect-python (Recommended)
-        k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
-        stk_service = k2connect.ReceivePayments
+        try:
+            logger.info(f"Initializing STK push for amount: {amount}, phone: {phone_number}")
+            k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
+            stk_service = k2connect.ReceivePayments
 
-        request_body ={
-        "access_token": self.authorization(),
-        "callback_url": "https://webhook.site/52fd1913-778e-4ee1-bdc4-74517abb758d",
-        "payment_channel": "MPESA",
-        "phone_number": phone_number,
-        "till_number": TILL_NUMBER,
-        "amount": amount,
-        "first_name": "python_first_name",
-        "last_name": "python_last_name",
-        "email": "john.doe@gmail.com",
-        }
+            request_body ={
+                "access_token": self.authorization(),
+                "callback_url": f"{MY_BASE_URL}/api/payed/",
+                "payment_channel": "MPESA",
+                "phone_number": f"+254{phone_number}",
+                "till_number": TILL_NUMBER,
+                "amount": amount,
+                "first_name": "python_first_name",
+                "last_name": "python_last_name",
+                "email": "john.doe@gmail.com",
+            }
 
-        stk_push_location = stk_service.create_payment_request(request_body)
-        stk_push_location # => 'https://sandbox.kopokopo.com/api/v1/incoming_payments/247b1bd8-f5a0-4b71-a898-f62f67b8ae1c'
-        print(f"stk_push_location is {stk_push_location} and is of type {type(stk_push_location)}")
+            logger.debug(f"STK push request body: {request_body}")
+            stk_push_location = stk_service.create_payment_request(request_body)
+            logger.info(f"STK push initiated successfully. Location: {stk_push_location}")
+            return stk_push_location
+        except Exception as e:
+            logger.error(f"Failed to initiate STK push: {str(e)}")
+            raise
 
 
 class KopokopoService:

@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .utils import save_transaction_to_json
 from datetime import datetime
 import json
-from .services.kopokopo import KopokopoService
+from .services.kopokopo import KopokopoService, Kopokopo
 from .services.sessions import SessionsService
 from .services.mikrotik import Mikrotik
 from django.views.decorators.http import require_http_methods, require_GET
@@ -40,6 +40,10 @@ class PendingPaymentClass(generics.CreateAPIView):
                 # initiate stk push
                 # payment = KopokopoService()
                 # payment.create_payment_request(amount=serializer.data["amount"], phone_number=serializer.data["phoneNumber"])
+
+                payment = Kopokopo()
+                payment.stk_push(amount=serializer.data["amount"], phone_number=serializer.data["phoneNumber"])
+                
                 logger.info(f"Created pending payment: {serializer.data}")
                 return Response(
                     {
