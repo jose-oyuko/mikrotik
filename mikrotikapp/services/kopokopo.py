@@ -37,7 +37,7 @@ class Kopokopo:
                 "payment_channel": "MPESA",
                 "phone_number": f"+254{phone_number}",
                 "till_number": TILL_NUMBER,
-                "amount": amount,
+                "amount": str(amount),
                 "first_name": "python_first_name",
                 "last_name": "python_last_name",
                 "email": "john.doe@gmail.com",
