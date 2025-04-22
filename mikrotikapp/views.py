@@ -24,6 +24,8 @@ from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import StreamingHttpResponse
 import time
+from django.utils import timezone
+from .services.dashboard import Dashboard
 
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
@@ -307,8 +309,36 @@ def packages(request):
 
 @login_required(login_url='/login/')
 def admin_dashboard(request):
-    packages = Packages.objects.all()
-    return render(request, 'admin.html', {'packages': packages})
+    try:
+        dashboard_service = Dashboard()
+        
+        # Get dashboard data
+        transactions_data = dashboard_service.payed_today()
+        pending_payments_data = dashboard_service.pending_payment()
+        
+        # Get all packages
+        packages = Packages.objects.all()
+        
+        context = {
+            'transactions': transactions_data['transactions'],
+            'pending_payments': pending_payments_data['pending_payments'],
+            'packages': packages,
+            'total_paid': transactions_data['total_amount'],
+            'total_pending': pending_payments_data['total_amount'],
+            'active_tab': 'dashboard'
+        }
+        return render(request, 'admin.html', context)
+    except Exception as e:
+        logger.error(f"Error in admin_dashboard: {str(e)}")
+        messages.error(request, "Failed to load dashboard data")
+        return render(request, 'admin.html', {
+            'transactions': [],
+            'pending_payments': [],
+            'packages': Packages.objects.all(),
+            'total_paid': 0,
+            'total_pending': 0,
+            'active_tab': 'dashboard'
+        })
 
 @login_required(login_url='/login/')
 def change_password(request):
@@ -342,3 +372,27 @@ def payment_status_stream(request, mac_address):
     response['Cache-Control'] = 'no-cache'
     response['X-Accel-Buffering'] = 'no'
     return response
+
+class DashboardAPIView(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            dashboard_service = Dashboard()
+            
+            # Get today's transactions and pending payments
+            transactions_data = dashboard_service.payed_today()
+            pending_payments_data = dashboard_service.pending_payment()
+            
+            return Response({
+                'transactions': transactions_data['transactions'],
+                'pending_payments': pending_payments_data['pending_payments']
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error fetching dashboard data: {str(e)}")
+            return Response(
+                {'error': 'Failed to fetch dashboard data'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

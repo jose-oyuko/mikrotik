@@ -16,6 +16,7 @@ urlpatterns = [
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/change-password/', views.change_password, name='change_password'),
     path('api/payment-status/<str:mac_address>/', views.payment_status_stream, name='payment-status-stream'),
+    path('api/dashboard/', views.DashboardAPIView.as_view(), name='dashboard-api'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

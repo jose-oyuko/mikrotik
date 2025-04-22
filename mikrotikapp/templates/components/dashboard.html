@@ -1,0 +1,78 @@
+{% load static %}
+<div class="dashboard-container">
+  <!-- Today's Transactions Section -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <h2>Today's Transactions</h2>
+      <div class="total-amount">
+        <span>Total: KES {{ total_paid }}</span>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Amount</th>
+            <th>Phone Number</th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody id="transactions-body">
+          {% for transaction in transactions %}
+          <tr>
+            <td>{{ transaction.origination_time|date:"H:i" }}</td>
+            <td>KES {{ transaction.amount }}</td>
+            <td>{{ transaction.sender_phone_number }}</td>
+            <td>{{ transaction.sender_first_name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if transactions|length > 5 %}
+      <button id="show-all-transactions" class="btn-show-more">
+        Show All Transactions
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Pending Payments Section -->
+  <div class="dashboard-section">
+    <div class="section-header">
+      <h2>Pending Payments</h2>
+      <div class="total-amount">
+        <span>Total: KES {{ total_pending }}</span>
+      </div>
+    </div>
+    <div class="table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Amount</th>
+            <th>Phone Number</th>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+          </tr>
+        </thead>
+        <tbody id="pending-body">
+          {% for payment in pending_payments %}
+          <tr>
+            <td>{{ payment.created_at|date:"H:i" }}</td>
+            <td>KES {{ payment.amount }}</td>
+            <td>{{ payment.phoneNumber }}</td>
+            <td>{{ payment.ipAddress }}</td>
+            <td>{{ payment.macAddress }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if pending_payments|length > 5 %}
+      <button id="show-all-pending" class="btn-show-more">
+        Show All Pending
+      </button>
+      {% endif %}
+    </div>
+  </div>
+</div>
