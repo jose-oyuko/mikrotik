@@ -78,3 +78,52 @@ function formatCurrency(amount) {
     currency: "KES",
   }).format(amount);
 }
+
+function updateActiveSessions() {
+  fetch("/api/sessions/active")
+    .then((response) => response.json())
+    .then((data) => {
+      const tbody = document
+        .getElementById("active-sessions-table")
+        .getElementsByTagName("tbody")[0];
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        tbody.innerHTML =
+          '<tr><td colspan="6" class="text-center">No active sessions</td></tr>';
+        return;
+      }
+
+      data.forEach((session) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${session.mac_address}</td>
+          <td>${session.phone_number}</td>
+          <td>KES ${session.package_amount}</td>
+          <td>${new Date(session.starting_time).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}</td>
+          <td>${new Date(session.end_time).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}</td>
+          <td>${session.period}</td>
+        `;
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching active sessions:", error);
+      const tbody = document
+        .getElementById("active-sessions-table")
+        .getElementsByTagName("tbody")[0];
+      tbody.innerHTML =
+        '<tr><td colspan="6" class="text-center text-danger">Error loading active sessions</td></tr>';
+    });
+}
+
+// Update active sessions every 30 seconds
+setInterval(updateActiveSessions, 30000);
+
+// Initial update
+updateActiveSessions();

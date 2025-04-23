@@ -1,0 +1,49 @@
+{% load static %}
+<div class="dashboard-summary">
+  <div class="row">
+    <!-- Today's Total Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card bg-primary text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Today's Total</h6>
+              <h2 class="mt-2 mb-0">KES {{ total_paid|default:"0" }}</h2>
+            </div>
+            <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Payments Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card bg-warning text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Pending Payments</h6>
+              <h2 class="mt-2 mb-0">KES {{ total_pending|default:"0" }}</h2>
+            </div>
+            <i class="fas fa-clock fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Sessions Card -->
+    <div class="col-md-4 mb-4">
+      <div class="card bg-success text-white h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="card-title mb-0">Active Sessions</h6>
+              <h2 class="mt-2 mb-0">{{ active_sessions_count|default:"0" }}</h2>
+            </div>
+            <i class="fas fa-users fa-2x opacity-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

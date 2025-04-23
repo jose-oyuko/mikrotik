@@ -1,5 +1,5 @@
-from mikrotikapp.models import PendingPayment, PayedTransaction, Packages
-from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer
+from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions
+from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -9,23 +9,21 @@ from loguru import logger
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from .utils import save_transaction_to_json
 from datetime import datetime
 import json
-from .services.kopokopo import KopokopoService, Kopokopo
+from .services.kopokopo import Kopokopo
 from .services.sessions import SessionsService
 from .services.mikrotik import Mikrotik
 from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
-from django.db import models
 import re
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import StreamingHttpResponse
 import time
-from django.utils import timezone
 from .services.dashboard import Dashboard
+from django.utils import timezone
 
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
@@ -256,6 +254,13 @@ class PackegesDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
+class ActiveSessions(generics.ListAPIView):
+    queryset = sessions.objects.filter(end_time__gt=timezone.now())
+    serializer_class = SessionsSerializers
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('admin-packages')
@@ -320,13 +325,13 @@ def admin_dashboard(request):
         transactions_data = dashboard_service.payed_today()
         pending_payments_data = dashboard_service.pending_payment()
         
-        # Get all packages
-        packages = Packages.objects.all()
+        # Get active sessions
+        active_sessions = sessions.objects.filter(end_time__gt=timezone.now())
         
         context = {
             'transactions': transactions_data['transactions'],
             'pending_payments': pending_payments_data['pending_payments'],
-            'packages': packages,
+            'active_sessions': active_sessions,
             'total_paid': transactions_data['total_amount'],
             'total_pending': pending_payments_data['total_amount'],
             'active_tab': 'dashboard'
@@ -338,7 +343,7 @@ def admin_dashboard(request):
         return render(request, 'admin.html', {
             'transactions': [],
             'pending_payments': [],
-            'packages': Packages.objects.all(),
+            'active_sessions': [],
             'total_paid': 0,
             'total_pending': 0,
             'active_tab': 'dashboard'

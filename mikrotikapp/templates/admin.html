@@ -126,6 +126,12 @@
           id="dashboard"
           role="tabpanel"
         >
+          <!-- Summary Cards -->
+          {% include 'components/dashboard_summary.html' %}
+
+          <!-- Active Sessions by Package -->
+          {% include 'components/active_sessions.html' %}
+
           <!-- Today's Transactions -->
           <div class="card mb-4">
             <div

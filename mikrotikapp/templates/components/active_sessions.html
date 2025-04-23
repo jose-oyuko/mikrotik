@@ -1,0 +1,40 @@
+{% load static %}
+<div class="active-sessions">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Active Sessions</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped" id="active-sessions-table">
+          <thead>
+            <tr>
+              <th>MAC Address</th>
+              <th>Phone Number</th>
+              <th>Package Amount</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Period</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for session in active_sessions %}
+            <tr>
+              <td>{{ session.mac_address }}</td>
+              <td>{{ session.phone_number }}</td>
+              <td>KES {{ session.package_amount }}</td>
+              <td>{{ session.starting_time|date:"H:i" }}</td>
+              <td>{{ session.end_time|date:"H:i" }}</td>
+              <td>{{ session.period }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center">No active sessions</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
