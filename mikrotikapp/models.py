@@ -42,7 +42,7 @@ class PayedTransaction(models.Model):
 
 class Packages(models.Model):
     period_in_minutes = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.IntegerField()
 
     def __str__(self):
         minutes = self.period_in_minutes

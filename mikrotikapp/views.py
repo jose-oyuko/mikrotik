@@ -328,10 +328,14 @@ def admin_dashboard(request):
         # Get active sessions
         active_sessions = sessions.objects.filter(end_time__gt=timezone.now())
         
+        # Get all packages
+        packages = Packages.objects.all()
+        
         context = {
             'transactions': transactions_data['transactions'],
             'pending_payments': pending_payments_data['pending_payments'],
             'active_sessions': active_sessions,
+            'packages': packages,
             'total_paid': transactions_data['total_amount'],
             'total_pending': pending_payments_data['total_amount'],
             'active_tab': 'dashboard'
@@ -344,6 +348,7 @@ def admin_dashboard(request):
             'transactions': [],
             'pending_payments': [],
             'active_sessions': [],
+            'packages': Packages.objects.all(),
             'total_paid': 0,
             'total_pending': 0,
             'active_tab': 'dashboard'
