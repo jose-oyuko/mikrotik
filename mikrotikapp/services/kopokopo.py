@@ -2,12 +2,17 @@ import k2connect
 from django.conf import settings
 from loguru import logger
 
-CLIENT_SECRET = settings.KOPOKOPO['CLIENT_SECRET']
-API_KEY = settings.KOPOKOPO['API_KEY']
-CLIENT_ID = settings.KOPOKOPO['CLIENT_ID']
-BASE_URL = settings.KOPOKOPO['BASE_URL']
+# CLIENT_SECRET = settings.KOPOKOPO['CLIENT_SECRET']
+# API_KEY = settings.KOPOKOPO['API_KEY']
+# CLIENT_ID = settings.KOPOKOPO['CLIENT_ID']
+# BASE_URL = settings.KOPOKOPO['BASE_URL']
 TILL_NUMBER = settings.KOPOKOPO['TILL_NUMBER']
 MY_BASE_URL = settings.MY_BASE_URL
+
+CLIENT_SECRET = "jfz_Dw2ryHahbw8mFY14KFZuXcdbyhxfxiuqANqe2Bc"
+API_KEY = "d29085307911d856736baf6b78354ab02022de89"
+CLIENT_ID = "TlAF-KtkE7PPdSW1gX2sCqzNBBUb5zT8mGfoQhzy41s"
+BASE_URL = "https://api.kopokopo.com/"
 
 
 class Kopokopo:
@@ -31,13 +36,20 @@ class Kopokopo:
             k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
             stk_service = k2connect.ReceivePayments
 
-            request_body ={
+            # Format phone number to include +254
+            if not phone_number.startswith('+254'):
+                if phone_number.startswith('0'):
+                    phone_number = '+254' + phone_number[1:]
+                else:
+                    phone_number = '+254' + phone_number
+
+            request_body = {
                 "access_token": self.authorization(),
                 "callback_url": f"{MY_BASE_URL}/api/payed/",
                 "payment_channel": "MPESA",
-                "phone_number": f"+254{phone_number}",
+                "phone_number": str(phone_number),
                 "till_number": TILL_NUMBER,
-                "amount": str(amount),
+                "amount": str(amount),  # Keep amount as string
                 "first_name": "python_first_name",
                 "last_name": "python_last_name",
                 "email": "john.doe@gmail.com",

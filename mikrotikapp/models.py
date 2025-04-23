@@ -11,7 +11,7 @@ class PendingPayment(models.Model):
     ipAddress = models.GenericIPAddressField()
     payed = models.BooleanField(default=False)
     time = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.IntegerField()
     
     class Meta:
         indexes = [
@@ -26,7 +26,7 @@ class PayedTransaction(models.Model):
     reference = models.CharField(max_length=20)  # Kopokopo reference
     origination_time = models.DateTimeField()
     sender_phone_number = LastNineDigitsPhoneField(max_length=9)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.IntegerField()
     till_number = models.CharField(max_length=10)
     sender_first_name = models.CharField(max_length=100, null=True, blank=True)
     sender_middle_name = models.CharField(max_length=100, null=True, blank=True)
