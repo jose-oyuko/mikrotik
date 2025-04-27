@@ -129,82 +129,13 @@
           <!-- Summary Cards -->
           {% include 'components/dashboard_summary.html' %}
 
-          <!-- Active Sessions by Package -->
+          <!-- Active Sessions -->
           {% include 'components/active_sessions.html' %}
 
-          <!-- Today's Transactions -->
-          <div class="card mb-4">
-            <div
-              class="card-header d-flex justify-content-between align-items-center"
-            >
-              <h5 class="mb-0">Today's Transactions</h5>
-              <span class="badge bg-primary"
-                >Total: {{ total_paid|default:"0" }} KSH</span
-              >
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-striped" id="transactions-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Amount</th>
-                      <th>Phone Number</th>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for transaction in transactions %}
-                    <tr>
-                      <td>{{ transaction.origination_time }}</td>
-                      <td>{{ transaction.amount }} KSH</td>
-                      <td>{{ transaction.sender_phone_number }}</td>
-                      <td>{{ transaction.sender_first_name }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <div class="my-4"></div>
 
-          <!-- Pending Payments -->
-          <div class="card">
-            <div
-              class="card-header d-flex justify-content-between align-items-center"
-            >
-              <h5 class="mb-0">Pending Payments</h5>
-              <span class="badge bg-warning"
-                >Total: {{ total_pending|default:"0" }} KSH</span
-              >
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-striped" id="pending-payments-table">
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Amount</th>
-                      <th>Phone Number</th>
-                      <th>IP Address</th>
-                      <th>MAC Address</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for payment in pending_payments %}
-                    <tr>
-                      <td>{{ payment.time }}</td>
-                      <td>{{ payment.amount }} KSH</td>
-                      <td>{{ payment.phoneNumber }}</td>
-                      <td>{{ payment.ipAddress }}</td>
-                      <td>{{ payment.macAddress }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <!-- Dashboard Component -->
+          {% include 'components/dashboard.html' %}
         </div>
 
         <!-- Packages Tab -->
