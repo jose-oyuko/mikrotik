@@ -1,4 +1,4 @@
-from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions
+from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions, Commands
 from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,16 +15,62 @@ import json
 from .services.kopokopo import Kopokopo
 from .services.sessions import SessionsService
 from .services.mikrotik import Mikrotik
+from .services.commands import CommandsServices
 from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
 import re
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, JsonResponse
 import time
 from .services.dashboard import Dashboard
 from django.utils import timezone
 
+
+class CommandsList(generics.ListCreateAPIView):
+    queryset = Commands.objects.all()
+    serializer_class = SessionsSerializers
+    
+
+class CommandsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Commands.objects.all()
+    serializer_class = SessionsSerializers
+
+    
+@require_http_methods(["GET"])
+def get_commands(request):
+    commands = Commands.objects.filter(
+        executed=False
+    ).order_by('created_at')
+    command_list = []
+    for command in commands:
+        command_list.append({
+            'id': command.id,
+            'data':{
+                'type':command.comand_type,
+            'params': command.params,
+            }
+            
+
+        })
+    return JsonResponse({'commands': command_list})
+    
+@require_http_methods(["POST"])
+def report_status(request):
+    try:
+        data = json.loads(request.body)
+        command_id = data.get('command_id')
+        status_data = data.get('status')
+        
+        # Update the command status in the database
+        command = Commands.objects.get(id=command_id)
+        if status_data.get('status') == 'success':
+            command.executed = True
+            command.save()
+            logger.info(f"Command {command_id} executed successfully")
+    except Exception as e:
+        logger.error(f"Error reporting status: {str(e)}")
+        return JsonResponse({'error': 'Failed to report status'}, status=500)
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
     serializer_class = PendingPaymentSerializer
@@ -225,14 +271,16 @@ class PayedTransactions(generics.CreateAPIView):
             session_details = session_service.check_session(pending_payment.macAddress)
             if session_details:
                 logger.info(f"Session details retrieved for phone: {phone_number}")
-                mikrotik = Mikrotik()
-                mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
-                try:
-                    mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
-                except Mikrotik.ReAddUserError:
-                    mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
-                    mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
-
+                # mikrotik = Mikrotik()
+                # mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                # try:
+                #     mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                # except Mikrotik.ReAddUserError:
+                #     mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                #     mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
+                commands = CommandsServices()
+                commands.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
+                commands.login(session_details['mac_address'], pending_payment.ipAddress)
                 return 
 
             logger.error(f"Failed to retrieve session details for phone: {phone_number}")
@@ -303,10 +351,13 @@ def packages(request):
     session_service = SessionsService()
     session = session_service.check_session(mac_address=user_data['mac'])
     if session:
-        mikrotik = Mikrotik()
-        mikrotik.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
-        mikrotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
+        # mikrotik = Mikrotik()
+        # mikrotik.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
+        # mikrotik.login_user(mac=session['mac_address'], ip=user_data['ip'])
 
+        command = CommandsServices()
+        command.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
+        command.login(mac=user_data['mac'], ip=user_data['ip'])
     
     packages = Packages.objects.all()
 

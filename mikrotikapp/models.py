@@ -58,3 +58,16 @@ class sessions(models.Model):
     end_time = models.DateTimeField(null=False, blank=False)
     phone_number = LastNineDigitsPhoneField(max_length=9)
     period = models.CharField(max_length=15)
+
+
+class Commands(models.Model):
+    COMMAND_TYPES = [
+        ('add_user', 'Add User'),
+        ('login_user', 'Login User'),
+        ('remove_user', 'Remove User'),
+        ('update_user', 'Update User'),
+    ]
+    comand_type = models.CharField(max_length=50, choices=COMMAND_TYPES)
+    params = models.JSONField()
+    executed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
