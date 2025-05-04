@@ -55,6 +55,7 @@ def get_commands(request):
         })
     return JsonResponse({'commands': command_list})
     
+@csrf_exempt
 @require_http_methods(["POST"])
 def report_status(request):
     try:
@@ -68,6 +69,7 @@ def report_status(request):
             command.executed = True
             command.save()
             logger.info(f"Command {command_id} executed successfully")
+        return JsonResponse({'message': 'Status reported successfully'}, status=200)
     except Exception as e:
         logger.error(f"Error reporting status: {str(e)}")
         return JsonResponse({'error': 'Failed to report status'}, status=500)
@@ -279,8 +281,9 @@ class PayedTransactions(generics.CreateAPIView):
                 #     mikrotik.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
                 #     mikrotik.login_user(session_details['mac_address'], pending_payment.ipAddress)
                 commands = CommandsServices()
-                commands.add_user(session_details['mac_address'], session_details['mac_address'], session_details['time_remaining'])
-                commands.login(session_details['mac_address'], pending_payment.ipAddress)
+                commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=session_details['time_remaining'])
+                commands.login(mac=session_details['mac_address'], ip=pending_payment.ipAddress, time=session_details['time_remaining'])
+                logger.info(f"User logged in successfully for phone: {phone_number}")
                 return 
 
             logger.error(f"Failed to retrieve session details for phone: {phone_number}")

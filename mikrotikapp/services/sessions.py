@@ -11,7 +11,6 @@ class SessionsService():
         
         # Use timezone.now() instead of datetime.now() to ensure timezone awareness
         end_time = timezone.now() + timedelta(minutes=period)
-        
         session_data = {
             "mac_address": mac_address,
             "package_amount": package_amount,
