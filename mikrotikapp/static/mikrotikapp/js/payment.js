@@ -39,11 +39,21 @@ function getCookie(name) {
 
 // Function to start session check
 function startSessionCheck(macAddress) {
+  console.log("Starting session check with MAC:", macAddress);
+  console.log("MAC address type:", typeof macAddress);
+
+  if (!macAddress) {
+    console.error("MAC address is undefined or empty");
+    return;
+  }
+
   const eventSource = new EventSource(`/api/payment-status/${macAddress}/`);
 
   eventSource.onmessage = function (event) {
+    console.log("Received SSE message:", event.data);
     const data = JSON.parse(event.data);
     if (data.status === "success") {
+      console.log("Session check successful, redirecting to:", data.link_orig);
       eventSource.close();
       window.location.href = data.link_orig;
     }
@@ -60,6 +70,8 @@ document.getElementById("paymentForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const formData = new FormData(this);
+  console.log("Form MAC address:", formData.get("macAddress"));
+
   const data = {
     phoneNumber: formData.get("phoneNumber"),
     amount: formData.get("amount"),
@@ -70,6 +82,8 @@ document.getElementById("paymentForm").addEventListener("submit", function (e) {
     linkLoginOnly: formData.get("linkLoginOnly"),
     linkOrig: formData.get("linkOrig"),
   };
+
+  console.log("Submitting payment data:", data);
 
   fetch("/api/pending/", {
     method: "POST",
@@ -88,6 +102,7 @@ document.getElementById("paymentForm").addEventListener("submit", function (e) {
       return response.json();
     })
     .then((data) => {
+      console.log("Payment API response:", data);
       // Close the modal
       modal.style.display = "none";
       // Show success message

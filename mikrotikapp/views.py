@@ -84,9 +84,6 @@ class PendingPaymentClass(generics.CreateAPIView):
             if serializer.is_valid():
                 serializer.save()
                 # initiate stk push
-                # payment = KopokopoService()
-                # payment.create_payment_request(amount=serializer.data["amount"], phone_number=serializer.data["phoneNumber"])
-
                 payment = Kopokopo()
                 payment.stk_push(amount=serializer.data["amount"], phone_number=serializer.data["phoneNumber"])
                 
@@ -94,7 +91,8 @@ class PendingPaymentClass(generics.CreateAPIView):
                 return Response(
                     {
                         'message': 'Pending payment created successfully',
-                        'id': serializer.data['id']
+                        'id': serializer.data['id'],
+                        'macAddress': serializer.data['macAddress']
                     },
                     status=status.HTTP_201_CREATED
                 )
