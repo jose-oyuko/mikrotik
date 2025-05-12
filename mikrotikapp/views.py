@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from loguru import logger
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -41,8 +42,11 @@ class CommandsDetail(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-    
-@require_http_methods(["GET"])
+# authorize the user to access the commands
+
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def get_commands(request):
     logger.info("Received request to fetch unexecuted commands")
     try:
@@ -71,8 +75,9 @@ def get_commands(request):
         logger.error(f"Error fetching commands: {str(e)}", exc_info=True)
         return JsonResponse({'error': 'Failed to fetch commands'}, status=500)
     
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(['POST'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def report_status(request):
     try:
         data = json.loads(request.body)
