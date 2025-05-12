@@ -70,28 +70,37 @@ def get_network_settings():
 
 def setup_logging():
     """
-    Configure logging based on environment variables
+    Configure logging based on environment variables.
+    This function should be called when the application starts.
     """
-    log_level = settings.LOG_LEVEL
-    log_file = settings.LOG_FILE
+    # Create logs directory if it doesn't exist
+    log_dir = os.path.join(settings.BASE_DIR, 'logs')
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
     # Remove default handler
     logger.remove()
 
-    # Add file handler
+    # Add file handler with rotation and compression
     logger.add(
-        log_file,
-        rotation="500 MB",
-        retention="10 days",
-        level=log_level,
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+        os.path.join(log_dir, "mikrotik.log"),
+        rotation="5 MB",  # Rotate when file reaches 5MB
+        retention="1 week",  # Keep logs for 1 week
+        compression="zip",  # Compress rotated logs
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+        level="INFO",
+        backtrace=True,
+        diagnose=True
     )
 
-    # Add console handler
-    logger.add(
-        lambda msg: print(msg),
-        level=log_level,
-        format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
-    )
+    # Add console handler for development
+    if settings.DEBUG:
+        logger.add(
+            lambda msg: print(msg),
+            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+            level="DEBUG",
+            colorize=True
+        )
 
+    logger.info("Logging system initialized successfully")
     return logger 

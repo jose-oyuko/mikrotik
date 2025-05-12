@@ -39,21 +39,32 @@ class CommandsDetail(generics.RetrieveUpdateDestroyAPIView):
     
 @require_http_methods(["GET"])
 def get_commands(request):
-    commands = Commands.objects.filter(
-        executed=False
-    ).order_by('created_at')
-    command_list = []
-    for command in commands:
-        command_list.append({
-            'id': command.id,
-            'data':{
-                'type':command.comand_type,
-            'params': command.params,
+    logger.info("Received request to fetch unexecuted commands")
+    try:
+        commands = Commands.objects.filter(
+            executed=False
+        ).order_by('created_at')
+        
+        logger.info(f"Found {commands.count()} unexecuted commands")
+        
+        command_list = []
+        for command in commands:
+            command_data = {
+                'id': command.id,
+                'data': {
+                    'type': command.comand_type,
+                    'params': command.params,
+                }
             }
-            
-
-        })
-    return JsonResponse({'commands': command_list})
+            command_list.append(command_data)
+            logger.debug(f"Added command to list: ID={command.id}, Type={command.comand_type}, Params={command.params}")
+        
+        logger.info(f"Successfully prepared {len(command_list)} commands for response")
+        return JsonResponse({'commands': command_list})
+        
+    except Exception as e:
+        logger.error(f"Error fetching commands: {str(e)}", exc_info=True)
+        return JsonResponse({'error': 'Failed to fetch commands'}, status=500)
     
 @csrf_exempt
 @require_http_methods(["POST"])
