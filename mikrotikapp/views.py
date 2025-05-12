@@ -1,5 +1,5 @@
 from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions, Commands
-from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers
+from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers, CommandsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -27,14 +27,19 @@ from .services.dashboard import Dashboard
 from django.utils import timezone
 
 
-class CommandsList(generics.ListCreateAPIView):
-    queryset = Commands.objects.all()
+class CommandsList(generics.ListAPIView):
+    queryset = Commands.objects.filter(executed=False)
     serializer_class = SessionsSerializers
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
     
 
 class CommandsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Commands.objects.all()
     serializer_class = SessionsSerializers
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
     
 @require_http_methods(["GET"])
