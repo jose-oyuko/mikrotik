@@ -22,6 +22,8 @@ urlpatterns = [
     path('api/dashboard/', views.DashboardAPIView.as_view(), name='dashboard-api'),
     path('api/commands/', views.get_commands, name='get-commands'),
     path('api/commands/status/', views.report_status, name='report-status'),
+    path('api/tickets/', views.TicketsView.as_view(), name='tickets-view'),
+    path('api/tickets/<int:pk>/', views.TicketsDetail.as_view(), name='tickets-detail'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

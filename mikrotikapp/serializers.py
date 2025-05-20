@@ -1,6 +1,12 @@
-from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions, Commands
+from mikrotikapp.models import Tickets, PendingPayment, PayedTransaction, Packages, sessions, Commands
 from rest_framework import serializers
 import re
+
+class TicketsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tickets
+        fields = '__all__'
+
 
 class CommandsSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField()

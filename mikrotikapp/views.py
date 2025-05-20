@@ -1,5 +1,5 @@
-from mikrotikapp.models import PendingPayment, PayedTransaction, Packages, sessions, Commands
-from mikrotikapp.serializers import PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers, CommandsSerializer
+from mikrotikapp.models import Tickets ,PendingPayment, PayedTransaction, Packages, sessions, Commands
+from mikrotikapp.serializers import TicketsSerializer, PayedTransactionSerializer, PendingPaymentSerializer, PackagesSerializer, SessionsSerializers, CommandsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -17,6 +17,7 @@ from .services.kopokopo import Kopokopo
 from .services.sessions import SessionsService
 from .services.mikrotik import Mikrotik
 from .services.commands import CommandsServices
+from .services.tickets import TicketService
 from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
 import re
@@ -26,6 +27,34 @@ from django.http import StreamingHttpResponse, JsonResponse
 import time
 from .services.dashboard import Dashboard
 from django.utils import timezone
+
+
+class TicketsView(generics.ListCreateAPIView):
+    queryset = Tickets.objects.all()
+    serializer_class = TicketsSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        ticketPeriod = request.data.get('ticketPeriod')
+        if not ticketPeriod:
+            return Response({'error': 'ticketPeriod is required'}, status=status.HTTP_400_BAD_REQUEST)
+        ticketService = TicketService()
+        ticketData = ticketService.createTicket(ticketPeriod)
+        if not ticketData:
+            return Response({'error': 'Failed to create ticket'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        serializer = self.get_serializer(data=ticketData)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        logger.info(f"Ticket created successfully: {serializer.data}")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+
+class TicketsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Tickets.objects.all()
+    serializer_class = TicketsSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 class CommandsList(generics.ListAPIView):

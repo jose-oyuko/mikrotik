@@ -5,6 +5,15 @@ from loguru import logger
 from .fields import LastNineDigitsPhoneField
 
 # Create your models here.
+class Tickets(models.Model):
+    ticketUsername = models.CharField(max_length=100)
+    ticketPassword = models.CharField(max_length=100)
+    ticketPeriod = models.CharField(max_length=100)
+    used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+
+
 class PendingPayment(models.Model):
     phoneNumber = LastNineDigitsPhoneField(max_length=9)
     macAddress = models.CharField(max_length=17)
