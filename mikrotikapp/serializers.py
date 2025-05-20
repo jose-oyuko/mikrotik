@@ -3,9 +3,17 @@ from rest_framework import serializers
 import re
 
 class CommandsSerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+
     class Meta:
         model = Commands
-        fields = '__all__'        
+        fields = ['id', 'data', 'executed', 'created_at']
+
+    def get_data(self, obj):
+        return {
+            'type': obj.comand_type,
+            'params': obj.params
+        }
 
 class SessionsSerializers(serializers.ModelSerializer):
     class Meta:

@@ -30,7 +30,7 @@ from django.utils import timezone
 
 class CommandsList(generics.ListAPIView):
     queryset = Commands.objects.filter(executed=False)
-    serializer_class = SessionsSerializers
+    serializer_class = CommandsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -38,7 +38,7 @@ class CommandsList(generics.ListAPIView):
 
 class CommandsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Commands.objects.all()
-    serializer_class = SessionsSerializers
+    serializer_class = CommandsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 

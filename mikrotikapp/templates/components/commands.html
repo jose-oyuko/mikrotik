@@ -1,0 +1,84 @@
+{% load static %}
+<div class="commands-container">
+  <!-- Commands List Section -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Command List</h5>
+      <span class="badge bg-primary" id="total-commands">Total: 0</span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped" id="commands-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Parameters</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Commands will be loaded here dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <div class="text-center mt-3">
+        <button id="refresh-commands" class="btn btn-outline-primary">
+          <i class="fas fa-sync-alt me-2"></i>Refresh Commands
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Command Modal -->
+  <div class="modal fade" id="editCommandModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Command</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-command-form">
+            <input type="hidden" id="command-id" />
+            <div class="mb-3">
+              <label for="command-type" class="form-label">Command Type</label>
+              <input
+                type="text"
+                class="form-control"
+                id="command-type"
+                readonly
+              />
+            </div>
+            <div class="mb-3">
+              <label for="command-params" class="form-label">Parameters</label>
+              <textarea
+                class="form-control"
+                id="command-params"
+                rows="3"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="button" class="btn btn-primary" id="save-command">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

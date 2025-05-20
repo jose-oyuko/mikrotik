@@ -116,6 +116,18 @@
             Mikrotik
           </button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link {% if active_tab == 'commands' %}active{% endif %}"
+            id="commands-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#commands"
+            type="button"
+            role="tab"
+          >
+            Commands
+          </button>
+        </li>
       </ul>
 
       <!-- Tab Content -->
@@ -154,6 +166,15 @@
           role="tabpanel"
         >
           {% include 'components/mikrotik_config.html' %}
+        </div>
+
+        <!-- Commands Tab -->
+        <div
+          class="tab-pane fade {% if active_tab == 'commands' %}show active{% endif %}"
+          id="commands"
+          role="tabpanel"
+        >
+          {% include 'components/commands.html' %}
         </div>
       </div>
     </div>
@@ -228,6 +249,7 @@
 <script src="{% static 'mikrotikapp/js/utils.js' %}"></script>
 <script src="{% static 'mikrotikapp/js/packages.js' %}"></script>
 <script src="{% static 'mikrotikapp/js/mikrotik.js' %}"></script>
+<script src="{% static 'mikrotikapp/js/commands.js' %}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Initialize toast
