@@ -133,7 +133,9 @@ function addCommandButtonListeners() {
   // Edit button listeners
   document.querySelectorAll(".edit-command").forEach((button) => {
     button.addEventListener("click", function () {
+      console.log("Edit button clicked");
       const commandId = this.getAttribute("data-command-id");
+      console.log("Command ID:", commandId);
       openEditModal(commandId);
     });
   });
@@ -150,10 +152,15 @@ function addCommandButtonListeners() {
 }
 
 function openEditModal(commandId) {
+  console.log("Opening edit modal for command:", commandId);
   // Fetch command details
-  fetch(`/api/commands/${commandId}/`)
-    .then((response) => response.json())
+  fetch(`/api/commands/detail/${commandId}/`)
+    .then((response) => {
+      console.log("Response status:", response.status);
+      return response.json();
+    })
     .then((command) => {
+      console.log("Command data received:", command);
       document.getElementById("command-id").value = command.id;
       document.getElementById("command-type").value = command.data.type;
       document.getElementById("command-params").value = JSON.stringify(
@@ -163,10 +170,12 @@ function openEditModal(commandId) {
       );
 
       // Show modal
-      const modal = new bootstrap.Modal(
-        document.getElementById("editCommandModal")
-      );
+      const modalElement = document.getElementById("editCommandModal");
+      console.log("Modal element:", modalElement);
+      const modal = new bootstrap.Modal(modalElement);
+      console.log("Modal instance created");
       modal.show();
+      console.log("Modal show called");
     })
     .catch((error) => {
       console.error("Error fetching command details:", error);
@@ -181,7 +190,7 @@ function saveCommand() {
   try {
     const parsedParams = JSON.parse(params);
 
-    fetch(`/api/commands/${commandId}/`, {
+    fetch(`/api/commands/detail/${commandId}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -201,8 +210,6 @@ function saveCommand() {
 
         // Refresh commands list
         loadCommands();
-
-        // Show success message
         showSuccess("Command updated successfully");
       })
       .catch((error) => {
@@ -210,12 +217,12 @@ function saveCommand() {
         showError("Failed to update command");
       });
   } catch (e) {
-    showError("Invalid JSON format for parameters");
+    showError("Invalid JSON format");
   }
 }
 
 function deleteCommand(commandId) {
-  fetch(`/api/commands/${commandId}/`, {
+  fetch(`/api/commands/detail/${commandId}/`, {
     method: "DELETE",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
