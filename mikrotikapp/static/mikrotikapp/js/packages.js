@@ -39,8 +39,14 @@ function minutesToHumanReadable(minutes) {
   }
 }
 
-// Initialize package CRUD operations
+// Initialize packages functionality when the document is ready
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("Initializing packages functionality...");
+  setupEventListeners();
+});
+
+function setupEventListeners() {
+  console.log("Setting up event listeners...");
   const modal = document.getElementById("addPackageModal");
   const modalTitle = document.getElementById("modalTitle");
   const savePackageBtn = document.getElementById("savePackage");
@@ -169,4 +175,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-});
+}
+
+// Function to refresh the packages list
+function refreshPackages() {
+  console.log("Refreshing packages...");
+  window.location.reload();
+}
