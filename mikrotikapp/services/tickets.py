@@ -25,7 +25,7 @@ class TicketService:
             
        
 
-    def checkTicket(self, ticketUsername, ticketPassword, mac_address, phone_number, period, package_amount):
+    def checkTicket(self, ticketUsername, ticketPassword):
         """
         Check if a ticket is valid and not used.
         """
@@ -35,8 +35,9 @@ class TicketService:
                 return False
             else:
                 # add session
-                sessionService = SessionsService()
-                sessionService.add_session(mac_address, phone_number, period, package_amount)
-                return True
+                # sessionService = SessionsService()
+                # sessionService.add_session(mac_address, phone_number, period, package_amount)
+                ticketPeriod = ticket.ticketPeriod
+                return ticketPeriod
         except Tickets.DoesNotExist:
             return False

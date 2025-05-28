@@ -100,7 +100,7 @@ function updateTicketsTable(tickets) {
     row.innerHTML = `
             <td>${ticket.ticketUsername}</td>
             <td>${ticket.ticketPassword}</td>
-            <td>${ticket.ticketPeriod} Minutes</td>
+            <td>${formatPeriodDisplay(ticket.ticketPeriod)}</td>
             <td>
                 <span class="badge ${ticket.used ? "bg-danger" : "bg-success"}">
                     ${ticket.used ? "Used" : "Available"}
@@ -132,13 +132,56 @@ function showCreateTicketModal() {
   modal.show();
 }
 
+function convertToMinutes(value, unit) {
+  const numValue = parseInt(value);
+  switch (unit) {
+    case "days":
+      return numValue * 24 * 60; // Convert days to minutes
+    case "hours":
+      return numValue * 60; // Convert hours to minutes
+    case "minutes":
+      return numValue;
+    default:
+      return numValue;
+  }
+}
+
+function formatPeriodDisplay(minutes) {
+  if (minutes % (24 * 60) === 0) {
+    return `${minutes / (24 * 60)} Days`;
+  } else if (minutes % 60 === 0) {
+    return `${minutes / 60} Hours`;
+  } else {
+    return `${minutes} Minutes`;
+  }
+}
+
 function createTicket() {
   console.log("Creating new ticket...");
-  const period = document.getElementById("ticketPeriod").value;
-  if (!period) {
+  const periodValue = document.getElementById("ticketPeriod").value;
+  const periodUnit = document.getElementById("ticketPeriodUnit").value;
+
+  if (!periodValue) {
     showToast("Please enter a period", "error");
     return;
   }
+
+  // Convert period to minutes
+  let periodInMinutes;
+  switch (periodUnit) {
+    case "days":
+      periodInMinutes = parseInt(periodValue) * 24 * 60;
+      break;
+    case "hours":
+      periodInMinutes = parseInt(periodValue) * 60;
+      break;
+    case "minutes":
+      periodInMinutes = parseInt(periodValue);
+      break;
+    default:
+      periodInMinutes = parseInt(periodValue);
+  }
+  console.log("Period in minutes:", periodInMinutes);
 
   fetch("/api/tickets/", {
     method: "POST",
@@ -146,7 +189,7 @@ function createTicket() {
       "Content-Type": "application/json",
       "X-CSRFToken": getCookie("csrftoken"),
     },
-    body: JSON.stringify({ ticketPeriod: period }),
+    body: JSON.stringify({ ticketPeriod: periodInMinutes }),
   })
     .then((response) => {
       console.log("Create ticket response status:", response.status);
@@ -177,9 +220,9 @@ function viewTicket(ticketId) {
 
   document.getElementById("viewTicketUsername").value = ticket.ticketUsername;
   document.getElementById("viewTicketPassword").value = ticket.ticketPassword;
-  document.getElementById(
-    "viewTicketPeriod"
-  ).value = `${ticket.ticketPeriod} Minutes`;
+  document.getElementById("viewTicketPeriod").value = formatPeriodDisplay(
+    ticket.ticketPeriod
+  );
   document.getElementById("viewTicketStatus").value = ticket.used
     ? "Used"
     : "Available";

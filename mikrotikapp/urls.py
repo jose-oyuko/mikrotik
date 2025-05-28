@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/commands/status/', views.report_status, name='report-status'),
     path('api/tickets/', views.TicketsView.as_view(), name='tickets-view'),
     path('api/tickets/<int:pk>/', views.TicketsDetail.as_view(), name='tickets-detail'),
+    path('api/tickets/validate/', views.TicketValidation.as_view(), name='ticket-validation'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

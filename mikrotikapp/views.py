@@ -27,7 +27,53 @@ from django.http import StreamingHttpResponse, JsonResponse
 import time
 from .services.dashboard import Dashboard
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TicketValidation(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        mac_address = request.data.get('mac_address')
+        ip_address = request.data.get('ip_address')
+        ticketService = TicketService()
+        ticketValid = ticketService.checkTicket(username, password)
+        if not ticketValid:
+            return Response({'error': 'Invalid or used ticket'}, status=status.HTTP_400_BAD_REQUEST)
+        # Add session if ticket is valid
+        sessionService = SessionsService()
+        sessionService.add_session(
+            mac_address=mac_address,
+            phone_number=username,
+            period=int(ticketValid),
+            package_amount=0  # Assuming no package amount for tickets
+        )
+        logger.info(f"Ticket validated successfully for user: {username}")
+        session_details = sessionService.check_session(mac_address)
+        if not session_details:
+            return Response({'error': 'Failed to create session'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        # Convert time string to minutes
+        time_str = session_details['time_remaining']
+        total_minutes = 0
+        if 'd' in time_str:
+            days = int(time_str.split('d')[0])
+            total_minutes += days * 24 * 60
+            time_str = time_str.split('d')[1]
+        if 'h' in time_str:
+            hours = int(time_str.split('h')[0])
+            total_minutes += hours * 60
+            time_str = time_str.split('h')[1]
+        if 'm' in time_str:
+            minutes = int(time_str.split('m')[0])
+            total_minutes += minutes
+        
+        commands = CommandsServices()
+        commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=total_minutes)
+        commands.login(mac=mac_address, ip=ip_address, time=total_minutes)
+        return Response({'message': 'Ticket validated successfully'}, status=status.HTTP_200_OK)
+        
 
 class TicketsView(generics.ListCreateAPIView):
     queryset = Tickets.objects.all()

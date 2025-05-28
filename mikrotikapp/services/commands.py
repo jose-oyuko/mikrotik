@@ -39,6 +39,8 @@ class CommandsServices():
                 'comand_type': 'add_user',
                 'params': params
             }
+            print(f"Data for add_user command: {data}")
+             # Log the data being sent to the serializer
             serializer = CommandsSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()

@@ -85,15 +85,26 @@
       <div class="modal-body">
         <form id="createTicketForm">
           <div class="form-group">
-            <label for="ticketPeriod">Period (Days)</label>
-            <input
-              type="number"
-              class="form-control"
-              id="ticketPeriod"
-              name="ticketPeriod"
-              required
-              min="1"
-            />
+            <label for="ticketPeriod">Period</label>
+            <div class="input-group">
+              <input
+                type="number"
+                class="form-control"
+                id="ticketPeriod"
+                name="ticketPeriod"
+                required
+                min="1"
+              />
+              <select
+                class="form-select"
+                id="ticketPeriodUnit"
+                name="ticketPeriodUnit"
+              >
+                <option value="minutes">Minutes</option>
+                <option value="hours">Hours</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
           </div>
         </form>
       </div>

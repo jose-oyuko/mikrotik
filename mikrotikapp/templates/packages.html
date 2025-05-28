@@ -175,5 +175,19 @@
     <script src="{% static 'mikrotikapp/js/payment.js' %}"></script>
     <script src="{% static 'mikrotikapp/js/tickets.js' %}"></script>
     <script src="{% static 'mikrotikapp/js/packages.js' %}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var tabEl = document.getElementById("loginTabs");
+        if (tabEl) {
+          var tab = new bootstrap.Tab(tabEl);
+          // You might need to show the active tab explicitly if it's not happening automatically
+          var activeTab = document.querySelector("#loginTabs .nav-link.active");
+          if (activeTab) {
+            var activeTabInstance = new bootstrap.Tab(activeTab);
+            activeTabInstance.show();
+          }
+        }
+      });
+    </script>
   </body>
 </html>
