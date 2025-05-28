@@ -113,40 +113,40 @@
         <span class="close">&times;</span>
         <h2>Enter M-Pesa Number</h2>
         <form id="paymentForm">
-          <input type="hidden" id="packageId" name="packageId" />
+          <input type="hidden" id="paymentPackageId" name="packageId" />
           <input
             type="hidden"
-            id="macAddress"
+            id="paymentMacAddress"
             name="macAddress"
             value="{{ user_data.mac }}"
           />
           <input
             type="hidden"
-            id="ipAddress"
+            id="paymentIpAddress"
             name="ipAddress"
             value="{{ user_data.ip }}"
           />
           <input
             type="hidden"
-            id="username"
+            id="paymentUsername"
             name="username"
             value="{{ user_data.username }}"
           />
           <input
             type="hidden"
-            id="linkLogin"
+            id="paymentLinkLogin"
             name="linkLogin"
             value="{{ user_data.link_login }}"
           />
           <input
             type="hidden"
-            id="linkLoginOnly"
+            id="paymentLinkLoginOnly"
             name="linkLoginOnly"
             value="{{ user_data.link_login_only }}"
           />
           <input
             type="hidden"
-            id="linkOrig"
+            id="paymentLinkOrig"
             name="linkOrig"
             value="{{ user_data.link_orig }}"
           />
