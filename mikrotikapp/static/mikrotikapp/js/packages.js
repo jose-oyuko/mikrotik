@@ -106,11 +106,15 @@ function setupEventListeners() {
 
     // Save Package
     if (savePackageBtn) {
+      console.log("Found savePackageBtn, adding listener.");
       savePackageBtn.addEventListener("click", handlePackageSave);
     }
 
     // Edit Package
-    document.querySelectorAll(".edit-package").forEach((button) => {
+    const editButtons = document.querySelectorAll(".edit-package");
+    console.log("Edit buttons found:", editButtons.length, editButtons);
+    editButtons.forEach((button) => {
+      console.log("Adding listener to edit button:", button);
       button.addEventListener("click", function () {
         const packageId = this.dataset.id;
         const price = this.dataset.price;
@@ -146,15 +150,21 @@ function setupEventListeners() {
     });
 
     // Reset modal when hidden
-    modal.addEventListener("hidden.bs.modal", function () {
-      modal.querySelector(".modal-title").textContent = "Add New Package";
-      savePackageBtn.textContent = "Save Package";
-      packageForm.reset();
-      delete packageForm.dataset.packageId;
-    });
+    if (modal) {
+      console.log("Found modal, adding hidden listener.");
+      modal.addEventListener("hidden.bs.modal", function () {
+        modal.querySelector(".modal-title").textContent = "Add New Package";
+        savePackageBtn.textContent = "Save Package";
+        packageForm.reset();
+        delete packageForm.dataset.packageId;
+      });
+    }
 
     // Delete Package
-    document.querySelectorAll(".delete-package").forEach((button) => {
+    const deleteButtons = document.querySelectorAll(".delete-package");
+    console.log("Delete buttons found:", deleteButtons.length, deleteButtons);
+    deleteButtons.forEach((button) => {
+      console.log("Adding listener to delete button:", button);
       button.addEventListener("click", function () {
         const packageId = this.dataset.id;
         if (confirm("Are you sure you want to delete this package?")) {
@@ -178,6 +188,10 @@ function setupEventListeners() {
         }
       });
     });
+  }
+  // Also log if packageForm is not found
+  else {
+    console.log("packageForm not found, skipping package event listeners.");
   }
 }
 
