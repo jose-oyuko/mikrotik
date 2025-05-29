@@ -454,7 +454,7 @@ def packages(request):
 
         command = CommandsServices()
         command.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
-        command.login(mac=user_data['mac'], ip=user_data['ip'])
+        command.login(mac=user_data['mac'], ip=user_data['ip'], time=session['time_remaining'])
     
     packages = Packages.objects.all()
 
