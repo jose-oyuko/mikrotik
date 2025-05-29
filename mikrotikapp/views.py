@@ -55,23 +55,23 @@ class TicketValidation(APIView):
             return Response({'error': 'Failed to create session'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         # Convert time string to minutes
-        time_str = session_details['time_remaining']
-        total_minutes = 0
-        if 'd' in time_str:
-            days = int(time_str.split('d')[0])
-            total_minutes += days * 24 * 60
-            time_str = time_str.split('d')[1]
-        if 'h' in time_str:
-            hours = int(time_str.split('h')[0])
-            total_minutes += hours * 60
-            time_str = time_str.split('h')[1]
-        if 'm' in time_str:
-            minutes = int(time_str.split('m')[0])
-            total_minutes += minutes
+        # time_str = session_details['time_remaining']
+        # total_minutes = 0
+        # if 'd' in time_str:
+        #     days = int(time_str.split('d')[0])
+        #     total_minutes += days * 24 * 60
+        #     time_str = time_str.split('d')[1]
+        # if 'h' in time_str:
+        #     hours = int(time_str.split('h')[0])
+        #     total_minutes += hours * 60
+        #     time_str = time_str.split('h')[1]
+        # if 'm' in time_str:
+        #     minutes = int(time_str.split('m')[0])
+        #     total_minutes += minutes
         
         commands = CommandsServices()
-        commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=total_minutes)
-        commands.login(mac=mac_address, ip=ip_address, time=total_minutes)
+        commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=session_details['time_remaining'])
+        commands.login(mac=mac_address, ip=ip_address, time=session_details['time_remaining'])
         return Response({'message': 'Ticket validated successfully'}, status=status.HTTP_200_OK)
         
 

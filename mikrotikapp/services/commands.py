@@ -41,8 +41,12 @@ class CommandsServices():
             }
             print(f"Data for add_user command: {data}")
              # Log the data being sent to the serializer
+            logger.debug(f"Data sent to CommandsSerializer: {data}")
             serializer = CommandsSerializer(data=data)
+            
+            logger.debug(f"Serializer is_valid: {serializer.is_valid()}")
             if serializer.is_valid():
+                logger.debug(f"Serializer validated data: {serializer.validated_data}")
                 serializer.save()
                 logger.success(f"Successfully created add_user command for username: {username}")
                 return serializer.data

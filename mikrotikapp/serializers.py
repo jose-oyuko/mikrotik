@@ -13,7 +13,7 @@ class CommandsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Commands
-        fields = ['id', 'data', 'executed', 'created_at']
+        fields = ['id', 'comand_type', 'params', 'executed', 'created_at', 'data']
 
     def get_data(self, obj):
         return {

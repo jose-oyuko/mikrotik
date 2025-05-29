@@ -38,6 +38,9 @@ class TicketService:
                 # sessionService = SessionsService()
                 # sessionService.add_session(mac_address, phone_number, period, package_amount)
                 ticketPeriod = ticket.ticketPeriod
+                # Mark the ticket as used
+                ticket.used = True
+                ticket.save()
                 return ticketPeriod
         except Tickets.DoesNotExist:
             return False
