@@ -61,7 +61,7 @@ class Packages(models.Model):
             return f"{minutes} minutes"
 
 class sessions(models.Model):
-    mac_address = models.CharField(max_length=17)
+    mac_address = models.CharField(max_length=17, unique=True)
     package_amount = models.IntegerField()
     starting_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=False, blank=False)

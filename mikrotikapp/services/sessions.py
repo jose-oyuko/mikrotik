@@ -7,26 +7,45 @@ from loguru import logger
 
 class SessionsService():
     def add_session(self, mac_address, phone_number, period, package_amount):
-        logger.info(f"Attempting to add new session - MAC: {mac_address}, Phone: {phone_number}, Period: {period} minutes, Amount: {package_amount}")
-        
-        # Use timezone.now() instead of datetime.now() to ensure timezone awareness
-        end_time = timezone.now() + timedelta(minutes=period)
-        session_data = {
-            "mac_address": mac_address,
-            "package_amount": package_amount,
-            "end_time": end_time,
-            "phone_number": phone_number,
-            "period": period
-        }
-        
-        logger.debug(f"Session data prepared: {session_data}")
-        
-        serializer = SessionsSerializers(data=session_data)
-        if serializer.is_valid():
-            serializer.save()
-            logger.success(f"Session created successfully - MAC: {mac_address}, End Time: {end_time}")
+        logger.info(f"Attempting to add/update session - MAC: {mac_address}, Phone: {phone_number}, Period: {period} minutes, Amount: {package_amount}")
+
+        # Use timezone.now() to ensure timezone awareness
+        current_time = timezone.now()
+        end_time = current_time + timedelta(minutes=period)
+
+        # Check if a session with this MAC address already exists
+        existing_session = sessions.objects.filter(mac_address=mac_address).first()
+
+        if existing_session:
+            # Update the existing session
+            logger.info(f"Existing session found for MAC {mac_address}. Updating session.")
+            existing_session.package_amount = package_amount
+            existing_session.starting_time = current_time
+            existing_session.end_time = end_time
+            existing_session.phone_number = phone_number # Update phone number as it might change
+            existing_session.period = period # Update period
+            existing_session.save()
+            logger.success(f"Session updated successfully for MAC: {mac_address}, New End Time: {end_time}")
         else:
-            logger.error(f"Failed to create session - MAC: {mac_address}, Errors: {serializer.errors}")
+            # Create a new session if none exists
+            logger.info(f"No existing session found for MAC {mac_address}. Creating new session.")
+            session_data = {
+                "mac_address": mac_address,
+                "package_amount": package_amount,
+                "starting_time": current_time, # Explicitly set starting_time for new session
+                "end_time": end_time,
+                "phone_number": phone_number,
+                "period": period
+            }
+
+            logger.debug(f"New session data prepared: {session_data}")
+
+            serializer = SessionsSerializers(data=session_data)
+            if serializer.is_valid():
+                serializer.save()
+                logger.success(f"New session created successfully - MAC: {mac_address}, End Time: {end_time}")
+            else:
+                logger.error(f"Failed to create new session - MAC: {mac_address}, Errors: {serializer.errors}")
 
     def check_session(self, mac_address):
         try:
