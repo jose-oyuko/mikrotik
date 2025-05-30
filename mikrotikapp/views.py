@@ -27,9 +27,86 @@ from django.http import StreamingHttpResponse, JsonResponse
 import time
 from .services.dashboard import Dashboard
 from django.utils import timezone
+from django.db.models import Sum
+from django.utils.timezone import make_aware
+from datetime import datetime, time
 from django.utils.decorators import method_decorator
+from django.utils.dateparse import parse_date
 
 
+class ActiveSessionsByDateReange(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if not start_date:
+            return Response({'error': 'start_date is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        start_date = parse_date(start_date)
+        if not start_date:
+            return Response({'error': 'Invalid start_date format'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if end_date:
+            end_date = parse_date(end_date)
+            if not end_date:
+                return Response({'error': 'Invalid end_date format'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            end_date = start_date
+
+        start_datetime = make_aware(datetime.combine(start_date, time.min))
+        end_datetime = make_aware(datetime.combine(end_date, time.max))
+        active_sessions = sessions.objects.filter(
+            starting_time__range=(start_datetime, end_datetime)
+        ).values(
+            'mac_address', 'phone_number', 'starting_time', 'end_time', 'period'
+        ).order_by('-starting_time')
+        
+        logger.info(f"Retrieved {len(active_sessions)} active sessions from {start_date} to {end_date}")
+        return Response({
+            'active_sessions': list(active_sessions),
+            'count': len(active_sessions)
+        })
+
+
+class PayedTransactionsByDate(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if not start_date:
+            return Response({'error': 'start_date is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        start_date = parse_date(start_date)
+        if not start_date:
+            return Response({'error': 'Invalid start_date format'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if end_date:
+            end_date = parse_date(end_date)
+            if not end_date:
+                return Response({'error': 'Invalid end_date format'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            end_date = start_date
+
+        start_datetime = make_aware(datetime.combine(start_date, time.min))
+        end_datetime = make_aware(datetime.combine(end_date, time.max))
+        transactions = PayedTransaction.objects.filter(
+            origination_time__range=(start_datetime, end_datetime)
+        ).values(
+            'origination_time', 'amount', 'sender_phone_number', 'sender_first_name'
+        ).order_by('-origination_time')
+        total_amount = transactions.aggregate(total=Sum('amount'))['total'] or 0
+        logger.info(f"Retrieved {len(transactions)} transactions from {start_date} to {end_date} with total amount: {total_amount}")
+        return Response({
+            'transactions': list(transactions),
+            'total_amount': total_amount
+        })
+    
 @method_decorator(csrf_exempt, name='dispatch')
 class TicketValidation(APIView):
     def post(self, request):
