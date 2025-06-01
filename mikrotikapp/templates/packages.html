@@ -84,7 +84,7 @@
               <div class="package-card">
                 <h3>{{ package.name }}</h3>
                 <p class="price">KSH {{ package.price }}</p>
-                <p class="duration">{{ package.duration }} Days</p>
+                <p class="duration">{{ package.period_in_minutes }} Days</p>
                 <button
                   class="buy-button"
                   onclick="openModal('{{ package.id }}', '{{ package.price }}')"
@@ -174,7 +174,7 @@
     <script src="{% static 'mikrotikapp/lib/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'mikrotikapp/js/payment.js' %}"></script>
     <script src="{% static 'mikrotikapp/js/tickets.js' %}"></script>
-    <script src="{% static 'mikrotikapp/js/packages.js' %}"></script>
+    <!-- <script src="{% static 'mikrotikapp/js/packages.js' %}"></script> -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var tabEl = document.getElementById("loginTabs");
