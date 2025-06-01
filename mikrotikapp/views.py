@@ -146,9 +146,9 @@ class TicketValidation(APIView):
         #     minutes = int(time_str.split('m')[0])
         #     total_minutes += minutes
         
-        commands = CommandsServices()
-        commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=session_details['time_remaining'])
-        commands.login(mac=mac_address, ip=ip_address, time=session_details['time_remaining'])
+        # commands = CommandsServices()
+        # commands.add_user(username=session_details['mac_address'], password=session_details['mac_address'], time=session_details['time_remaining'])
+        # commands.login(mac=mac_address, ip=ip_address, time=session_details['time_remaining'])
         return Response({'message': 'Ticket validated successfully'}, status=status.HTTP_200_OK)
         
 
