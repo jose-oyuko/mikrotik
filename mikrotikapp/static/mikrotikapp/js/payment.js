@@ -5,7 +5,7 @@ const span = document.getElementsByClassName("close")[0];
 // Function to open modal
 function openModal(packageId, amount) {
   modal.style.display = "block";
-  document.getElementById("packageId").value = packageId;
+  document.getElementById("paymentPackageId").value = packageId;
   document.getElementById("amount").value = amount;
 }
 

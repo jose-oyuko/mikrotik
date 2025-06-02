@@ -1,4 +1,4 @@
-{% load static %}
+{% load static %} {% load package_filters %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -84,7 +84,9 @@
               <div class="package-card">
                 <h3>{{ package.name }}</h3>
                 <p class="price">KSH {{ package.price }}</p>
-                <p class="duration">{{ package.period_in_minutes }} Days</p>
+                <p class="duration">
+                  {{ package.period_in_minutes|format_period }}
+                </p>
                 <button
                   class="buy-button"
                   onclick="openModal('{{ package.id }}', '{{ package.price }}')"
