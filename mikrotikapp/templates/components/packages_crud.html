@@ -52,19 +52,27 @@
 </div>
 
 <!-- Add Package Modal -->
-<div class="modal fade" id="addPackageModal" tabindex="-1">
+<div
+  class="modal fade"
+  id="addPackageModal"
+  tabindex="-1"
+  aria-labelledby="addPackageModalLabel"
+  aria-hidden="true"
+>
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add New Package</h5>
+        <h5 class="modal-title" id="addPackageModalLabel">Add New Package</h5>
         <button
           type="button"
           class="btn-close"
           data-bs-dismiss="modal"
+          aria-label="Close"
         ></button>
       </div>
       <div class="modal-body">
-        <form id="packageForm">
+        <form id="packageForm" method="post">
+          {% csrf_token %}
           <div class="mb-3">
             <label for="packagePrice" class="form-label">Price</label>
             <input
@@ -72,20 +80,21 @@
               class="form-control"
               id="packagePrice"
               name="price"
-              step="0.01"
               required
+              min="0"
+              step="0.01"
             />
           </div>
           <div class="mb-3">
-            <label for="durationValue" class="form-label">Duration</label>
+            <label class="form-label">Duration</label>
             <div class="input-group">
               <input
                 type="number"
                 class="form-control"
                 id="durationValue"
                 name="duration_value"
-                min="1"
                 required
+                min="1"
               />
               <select
                 class="form-select"
@@ -98,11 +107,6 @@
               </select>
             </div>
           </div>
-          <input
-            type="hidden"
-            id="period_in_minutes"
-            name="period_in_minutes"
-          />
         </form>
       </div>
       <div class="modal-footer">
@@ -116,3 +120,250 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Function to get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Function to show toast notifications
+  function showToast(message, type = "info") {
+    const toastContainer =
+      document.querySelector(".toast-container") || createToastContainer();
+    const toast = document.createElement("div");
+    toast.className = `toast show bg-${
+      type === "error" ? "danger" : type === "success" ? "success" : "info"
+    } text-white`;
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "assertive");
+    toast.setAttribute("aria-atomic", "true");
+
+    toast.innerHTML = `
+        <div class="toast-header bg-${
+          type === "error" ? "danger" : type === "success" ? "success" : "info"
+        } text-white">
+            <i class="fas fa-${
+              type === "error"
+                ? "exclamation-circle"
+                : type === "success"
+                ? "check-circle"
+                : "info-circle"
+            } me-2"></i>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            ${message}
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
+  }
+
+  // Function to create toast container
+  function createToastContainer() {
+    const container = document.createElement("div");
+    container.className = "toast-container position-fixed top-0 end-0 p-3";
+    container.style.zIndex = "11";
+    document.body.appendChild(container);
+    return container;
+  }
+
+  // Function to convert duration to minutes
+  function convertToMinutes(value, unit) {
+    const numValue = parseInt(value);
+    switch (unit) {
+      case "days":
+        return numValue * 24 * 60;
+      case "hours":
+        return numValue * 60;
+      case "minutes":
+        return numValue;
+      default:
+        return numValue;
+    }
+  }
+
+  // Initialize when document is ready
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("Initializing packages functionality...");
+
+    const packageForm = document.getElementById("packageForm");
+    const addPackageModal = document.getElementById("addPackageModal");
+    const savePackageBtn = document.getElementById("savePackage");
+    const modalTitle = addPackageModal.querySelector(".modal-title");
+
+    // Save Package button click handler
+    if (savePackageBtn) {
+      savePackageBtn.addEventListener("click", function () {
+        console.log("Save button clicked");
+        const formData = new FormData(packageForm);
+        const packageId = packageForm.dataset.packageId;
+
+        // Get duration value and unit
+        const durationValue = formData.get("duration_value");
+        const durationUnit = formData.get("duration_unit");
+
+        // Convert to minutes
+        const periodInMinutes = convertToMinutes(durationValue, durationUnit);
+
+        const packageData = {
+          price: formData.get("price"),
+          period_in_minutes: periodInMinutes,
+        };
+
+        // Validate that duration is provided
+        if (!durationValue) {
+          showToast("Please provide duration", "error");
+          return;
+        }
+
+        const url = packageId
+          ? `/api/packages/${packageId}/`
+          : "/api/packages/";
+        const method = packageId ? "PUT" : "POST";
+
+        // Get the CSRF token
+        const csrftoken = getCookie("csrftoken");
+        if (!csrftoken) {
+          showToast("CSRF token not found. Please refresh the page.", "error");
+          return;
+        }
+
+        fetch(url, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          credentials: "same-origin",
+          body: JSON.stringify(packageData),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((data) => {
+                throw new Error(
+                  data.detail || data.error || "Failed to save package"
+                );
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            showToast(
+              `Package ${packageId ? "updated" : "created"} successfully`,
+              "success"
+            );
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            showToast(
+              error.message || "An error occurred while saving the package",
+              "error"
+            );
+          });
+      });
+    }
+
+    // Reset modal when hidden
+    addPackageModal.addEventListener("hidden.bs.modal", function () {
+      modalTitle.textContent = "Add New Package";
+      savePackageBtn.textContent = "Save Package";
+      packageForm.reset();
+      delete packageForm.dataset.packageId;
+    });
+
+    // Edit Package buttons
+    const editButtons = document.querySelectorAll(".edit-package");
+    editButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const packageId = this.dataset.id;
+        const price = this.dataset.price;
+        const minutes = this.dataset.minutes;
+
+        // Convert minutes to the most appropriate unit
+        let durationValue, durationUnit;
+        if (minutes % (24 * 60) === 0) {
+          durationValue = minutes / (24 * 60);
+          durationUnit = "days";
+        } else if (minutes % 60 === 0) {
+          durationValue = minutes / 60;
+          durationUnit = "hours";
+        } else {
+          durationValue = minutes;
+          durationUnit = "minutes";
+        }
+
+        // Update modal title
+        modalTitle.textContent = "Edit Package";
+        savePackageBtn.textContent = "Update Package";
+
+        // Populate the form with existing data
+        document.getElementById("packagePrice").value = price;
+        document.getElementById("durationValue").value = durationValue;
+        document.getElementById("durationUnit").value = durationUnit;
+        packageForm.dataset.packageId = packageId;
+
+        // Show the modal
+        const modal = new bootstrap.Modal(addPackageModal);
+        modal.show();
+      });
+    });
+
+    // Delete Package buttons
+    const deleteButtons = document.querySelectorAll(".delete-package");
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const packageId = this.dataset.id;
+        if (confirm("Are you sure you want to delete this package?")) {
+          const csrftoken = getCookie("csrftoken");
+          if (!csrftoken) {
+            showToast(
+              "CSRF token not found. Please refresh the page.",
+              "error"
+            );
+            return;
+          }
+
+          fetch(`/api/packages/${packageId}/`, {
+            method: "DELETE",
+            headers: {
+              "X-CSRFToken": csrftoken,
+            },
+            credentials: "same-origin",
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to delete package");
+              }
+              showToast("Package deleted successfully", "success");
+              location.reload();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              showToast(
+                error.message || "An error occurred while deleting the package",
+                "error"
+              );
+            });
+        }
+      });
+    });
+  });
+</script>
