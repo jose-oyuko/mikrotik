@@ -24,7 +24,7 @@ import re
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.http import StreamingHttpResponse, JsonResponse
-import time
+import time as time_sleep
 from .services.dashboard import Dashboard
 from django.utils import timezone
 from django.db.models import Sum
@@ -409,6 +409,7 @@ class PayedTransactions(generics.CreateAPIView):
     def check_pending(self, phone_number, amount):
         try:
             # Check if there's a pending payment for this phone number and amount
+            amount = int(float(amount))
             pending_payment = PendingPayment.objects.filter(
                 phoneNumber=phone_number,
                 amount=amount,
@@ -605,7 +606,7 @@ def payment_status_stream(request, mac_address):
                 yield f"data: {json.dumps({'status': 'success', 'link_orig': session.get('link_orig', 'https://google.com')})}\n\n"
                 break
             yield "data: {}\n\n"
-            time.sleep(2)  # Check every 2 seconds
+            time_sleep.sleep(2)  # Check every 2 seconds
     
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'
