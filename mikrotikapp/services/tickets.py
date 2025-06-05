@@ -3,10 +3,11 @@ import string
 from mikrotikapp.models import Tickets
 from mikrotikapp.services.sessions import SessionsService
 from mikrotikapp.serializers import TicketsSerializer
+from loguru import logger
 
 class TicketService:
-    def generate_random_word(self, length=4):
-        return ''.join(random.choices(string.ascii_lowercase, k=length))
+    def generate_random_word(self, length=5):
+        return ''.join(random.choices(string.ascii_lowercase, string.digits, k=length))
 
     def createTicket(self, ticketPeriod):
         """
@@ -14,12 +15,15 @@ class TicketService:
         """
         ticketUsername = self.generate_random_word()
         ticketPassword = self.generate_random_word()
+        while ticketPassword == ticketUsername:
+            ticketPassword = self.generate_random_word()
         ticketPeriod = ticketPeriod
         ticketData = {
             "ticketUsername": ticketUsername,
             "ticketPassword": ticketPassword,
             "ticketPeriod": ticketPeriod
         }
+        logger.info(f"Creating ticket with username: {ticketUsername} and password: {ticketPassword}")
         
         return ticketData
             
