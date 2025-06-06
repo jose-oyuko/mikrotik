@@ -1,3 +1,7 @@
+// Store modal instances globally
+let successModalInstance = null;
+let errorModalInstance = null;
+
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize tickets functionality
   initializeTickets();
@@ -9,23 +13,6 @@ function initializeTickets() {
   if (ticketLoginForm) {
     ticketLoginForm.addEventListener("submit", handleTicketLogin);
   }
-
-  // Initialize Bootstrap modals (ensure Bootstrap JS is loaded before this)
-  const successModalElement = document.getElementById("successModal");
-  if (successModalElement) {
-    const successModal = new bootstrap.Modal(successModalElement);
-    successModalElement.addEventListener("hidden.bs.modal", function (event) {
-      // Optional: Clear messages or reset modal state on hide
-    });
-  }
-
-  const errorModalElement = document.getElementById("errorModal");
-  if (errorModalElement) {
-    const errorModal = new bootstrap.Modal(errorModalElement);
-    errorModalElement.addEventListener("hidden.bs.modal", function (event) {
-      // Optional: Clear messages or reset modal state on hide
-    });
-  }
 }
 
 function handleTicketLogin(event) {
@@ -34,7 +21,6 @@ function handleTicketLogin(event) {
   const formData = new FormData(event.target);
   const ticketUsername = formData.get("ticketUsername");
   const ticketPassword = formData.get("ticketPassword");
-  // Use the updated unique IDs for hidden fields
   const macAddress = document.getElementById("ticketMacAddress")?.value;
   const ipAddress = document.getElementById("ticketIpAddress")?.value;
   const linkOrig = document.getElementById("ticketLinkOrig")?.value;
@@ -57,20 +43,17 @@ function handleTicketLogin(event) {
     password: ticketPassword,
     mac_address: macAddress,
     ip_address: ipAddress,
-    // link_orig is not sent to the backend validation endpoint,
-    // but we store it to use for redirection on success.
   };
 
   console.log("Sending ticket validation request:", postData);
 
   fetch("/api/tickets/validate/", {
-    // Use the correct validation endpoint
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-CSRFToken": getCookie("csrftoken"),
     },
-    body: JSON.stringify(postData), // Send JSON body
+    body: JSON.stringify(postData),
   })
     .then((response) => {
       console.log("Ticket validation response status:", response.status);
@@ -81,21 +64,8 @@ function handleTicketLogin(event) {
     .then(({ status, body }) => {
       console.log("Ticket validation response body:", body);
       if (status >= 200 && status < 300) {
-        // Success
-        showSuccess(body.message || "Ticket validated successfully");
-        // Redirect to original link after successful login
-        // Use the stored linkOrig
-        if (linkOrig) {
-          // Add a small delay before redirecting to allow the success modal to be seen
-          setTimeout(() => {
-            window.location.href = linkOrig;
-          }, 1500); // Redirect after 1.5 seconds
-        } else {
-          console.warn("linkOrig is not available for redirection.");
-          // Fallback or inform user
-        }
+        showSuccess(body.message || "Ticket validated successfully", linkOrig);
       } else {
-        // Error
         showError(body.error || "Failed to validate ticket");
       }
     })
@@ -105,29 +75,58 @@ function handleTicketLogin(event) {
     });
 }
 
-function showSuccess(message) {
-  const successModalElement = document.getElementById("successModal");
-  const successMessageElement = document.getElementById("successMessage");
-  if (successModalElement && successMessageElement) {
-    successMessageElement.textContent = message;
-    const successModal =
-      bootstrap.Modal.getInstance(successModalElement) ||
-      new bootstrap.Modal(successModalElement);
-    successModal.show();
+function showSuccess(message, redirectUrl = null) {
+  const successModal = document.getElementById("successModal");
+  const successMessage = document.getElementById("successMessage");
+
+  if (!successModal || !successMessage) {
+    console.error("Success modal elements not found");
+    return;
+  }
+
+  // Set the message
+  successMessage.textContent = message;
+
+  // Show the modal
+  successModal.style.display = "block";
+
+  // Add redirect handler if URL is provided
+  if (redirectUrl) {
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, 1500);
   }
 }
 
 function showError(message) {
-  const errorModalElement = document.getElementById("errorModal");
-  const errorMessageElement = document.getElementById("errorMessage");
-  if (errorModalElement && errorMessageElement) {
-    errorMessageElement.textContent = message;
-    const errorModal =
-      bootstrap.Modal.getInstance(errorModalElement) ||
-      new bootstrap.Modal(errorModalElement);
-    errorModal.show();
+  const errorModal = document.getElementById("errorModal");
+  const errorMessage = document.getElementById("errorMessage");
+
+  if (!errorModal || !errorMessage) {
+    console.error("Error modal elements not found");
+    return;
+  }
+
+  // Set the message
+  errorMessage.textContent = message;
+
+  // Show the modal
+  errorModal.style.display = "block";
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.style.display = "none";
   }
 }
+
+// Close modal when clicking outside
+window.onclick = function (event) {
+  if (event.target.classList.contains("custom-modal")) {
+    event.target.style.display = "none";
+  }
+};
 
 function getCookie(name) {
   let cookieValue = null;

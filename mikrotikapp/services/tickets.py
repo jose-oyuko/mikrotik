@@ -7,7 +7,7 @@ from loguru import logger
 
 class TicketService:
     def generate_random_word(self, length=5):
-        return ''.join(random.choices(string.ascii_lowercase, string.digits, k=length))
+        return ''.join(random.choices(string.ascii_lowercase+string.digits, k=length))
 
     def createTicket(self, ticketPeriod):
         """
