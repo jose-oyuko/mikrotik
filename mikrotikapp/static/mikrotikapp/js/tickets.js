@@ -64,7 +64,7 @@ function handleTicketLogin(event) {
     .then(({ status, body }) => {
       console.log("Ticket validation response body:", body);
       if (status >= 200 && status < 300) {
-        showSuccess(body.message || "Ticket validated successfully", linkOrig);
+        showSuccess(body.message || "Ticket validated successfully");
       } else {
         showError(body.error || "Failed to validate ticket");
       }
@@ -91,11 +91,11 @@ function showSuccess(message, redirectUrl = null) {
   successModal.style.display = "block";
 
   // Add redirect handler if URL is provided
-  if (redirectUrl) {
-    setTimeout(() => {
-      window.location.href = redirectUrl;
-    }, 1500);
-  }
+  // if (redirectUrl) {
+  //   setTimeout(() => {
+  //     window.location.href = redirectUrl;
+  //   }, 1500);
+  // }
 }
 
 function showError(message) {
