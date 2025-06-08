@@ -6,8 +6,8 @@ from .fields import LastNineDigitsPhoneField
 
 # Create your models here.
 class Tickets(models.Model):
-    ticketUsername = models.CharField(max_length=100)
-    ticketPassword = models.CharField(max_length=100)
+    ticketUsername = models.CharField(max_length=100, unique=True)
+    ticketPassword = models.CharField(max_length=100, unique=True)
     ticketPeriod = models.IntegerField()
     used = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
