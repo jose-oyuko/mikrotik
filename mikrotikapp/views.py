@@ -509,6 +509,12 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def packages_2(request):
+    return render(request,'captive_portal/packages.html')
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def packages(request):
@@ -540,7 +546,7 @@ def packages(request):
         'packages': packages,
         'user_data': user_data
     }
-    return render(request, 'packages.html', context)
+    return render(request, 'captive_portal/packages.html', context)
 
 @login_required(login_url='/login/')
 def admin_dashboard(request):

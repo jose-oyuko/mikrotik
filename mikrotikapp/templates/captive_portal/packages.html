@@ -1,0 +1,252 @@
+{% load static %} {% load package_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Munialo Internet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="{% static 'bootstrap/css/bootstrap.min.css' %}"
+    />
+  </head>
+  <body>
+    <div class="container my-5">
+      <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold">Munialo Internet</h1>
+        <h3>Don't pay, still under Development</h3>
+        <p class="text-muted">For help contact ....</p>
+        <p class="lead">Select a package to continue</p>
+      </div>
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-4" id="internetTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="packages-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#packages"
+            type="button"
+            role="tab"
+          >
+            Packages
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="tickets-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tickets"
+            type="button"
+            role="tab"
+          >
+            Tickets
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="internetTabContent">
+        <!-- Packages Tab -->
+        <div class="tab-pane fade show active" id="packages" role="tabpanel">
+          <div class="row justify-content-center">
+            <!-- Package 1 -->
+            {% for package in packages %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                  <h5 class="card-title">Price: Ksh {{ package.price }}</h5>
+                  <p class="card-text">
+                    Duration: {{ package.period_in_minutes|format_period }}
+                  </p>
+                  <button
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#paymentModal"
+                    data-price="5"
+                  >
+                    Buy
+                  </button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <!-- Package 2 -->
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                  <h5 class="card-title">Price: Ksh 10</h5>
+                  <p class="card-text">Duration: 10 minutes</p>
+                  <button
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#paymentModal"
+                    data-price="10"
+                  >
+                    Buy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tickets Tab -->
+        <div class="tab-pane fade" id="tickets" role="tabpanel">
+          <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+              <form class="border p-4 rounded shadow-sm" , id="ticketLoginForm">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="ticketUsername"
+                    class="form-control"
+                    placeholder="Enter username"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="ticketPassword"
+                    class="form-control"
+                    placeholder="Enter password"
+                    required
+                  />
+                  <input
+                    type="hidden"
+                    id="ticketMacAddress"
+                    name="ticketMacAddress"
+                    value="{{ user_data.mac }}"
+                  />
+                  <input
+                    type="hidden"
+                    id="ticketIpAddress"
+                    name="ticketIpAddress"
+                    value="{{ user_data.ip }}"
+                  />
+                </div>
+                <button type="submit" class="btn btn-success w-100">
+                  Login
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="paymentModal"
+      tabindex="-1"
+      aria-labelledby="paymentModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form>
+            <div class="modal-header">
+              <h5 class="modal-title" id="paymentModalLabel">
+                Confirm Purchase
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <p id="modal-price-text" class="mb-3">
+                Package Price: Ksh <span id="modal-price"></span>
+              </p>
+              <div class="mb-3">
+                <label for="mpesaNumber" class="form-label"
+                  >Enter M-Pesa Phone Number</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mpesaNumber"
+                  name="phoneNumber"
+                  placeholder="e.g., 07XXXXXXXX"
+                />
+                <input
+                  type="hidden"
+                  id="paymentMacAddress"
+                  name="macAddress"
+                  value="{{ user_data.mac }}"
+                />
+                <input
+                  type="hidden"
+                  id="paymentIpAddress"
+                  name="ipAddress"
+                  value="{{ user_data.ip }}"
+                />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary w-100">
+                Proceed to Pay
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading display -->
+    <div id="loadingIndicator" style="display: none">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span>Processing request...</span>
+    </div>
+
+    <!-- Response message -->
+    <div id="responseMessage" class="mt-3"></div>
+
+    <!-- loading modal -->
+    <div
+      class="modal fade"
+      id="loadingModal"
+      tabindex="-1"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+          <div class="spinner-border text-primary mb-2" role="status"></div>
+          <p>Processing payment, please wait...</p>
+        </div>
+      </div>
+    </div>
+    <!-- Result Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content p-3">
+          <h5 id="resultTitle" class="text-center mb-2"></h5>
+          <p id="resultMessage" class="text-center"></p>
+          <div class="text-center">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'captive_portal/js/payment.js' %}"></script>
+    <script src="{% static 'captive_portal/js/tickets.js' %}"></script>
+  </body>
+</html>
