@@ -1,7 +1,54 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize dashboard
-  initializeDashboard();
+  // initializeDashboard();
+  // Set up event listeners for buttons
+  document
+    .getElementById("dateTransactions")
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      getTransactionsByDate();
+    });
 });
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function getTransactionsByDate() {
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+  const url = `/api/payed_date_range/?start_date=${startDate}&end_date=${endDate}`;
+  console.log("Fetching transactions from", startDate, "to", endDate);
+  fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+  }).then(async (response) => {
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Transactions data:", data);
+      transactions = data.transactions;
+      total_amount = data.total_amount;
+      updateTransactionsTable(transactions);
+      document.getElementById(
+        "total_paid"
+      ).innerText = `Total: KSH ${total_amount}`;
+    }
+  });
+}
 
 function initializeDashboard() {
   // Load initial data
@@ -40,9 +87,9 @@ function updateTransactionsTable(transactions) {
   });
 
   // Update total amount
-  const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
-  document.querySelector("#transactions-total").textContent =
-    formatCurrency(totalAmount);
+  // const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+  // document.querySelector("#transactions-total").textContent =
+  //   formatCurrency(totalAmount);
 }
 
 function updatePendingPaymentsTable(payments) {

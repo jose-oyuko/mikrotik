@@ -3,8 +3,18 @@
   <!-- Today's Transactions Section -->
   <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Today's Transactions</h5>
-      <span class="badge bg-primary"
+      <h5 class="mb-0">Transactions</h5>
+      <form action="">
+        <label for="startDate">Start Date</label>
+        <input type="date" id="startDate" required />
+        <label for="endDate">End Date</label>
+        <input type="date" id="endDate" required />
+        <button type="submit" class="badge bg-primary" id="dateTransactions">
+          Fetch
+        </button>
+      </form>
+
+      <span class="badge bg-primary" id="total_paid"
         >Total: KSH {{ total_paid|default:"0" }}</span
       >
     </div>
@@ -84,3 +94,4 @@
     </div>
   </div>
 </div>
+<script src="{% static 'mikrotikapp/js/dashboard.js' %}"></script>
