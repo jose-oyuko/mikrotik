@@ -1,6 +1,5 @@
 // Initialize tickets functionality when the document is ready
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Initializing tickets functionality...");
   initializeTickets();
   setupEventListeners();
 });
@@ -10,7 +9,6 @@ let tickets = [];
 let ticketsRefreshInterval;
 
 function initializeTickets() {
-  console.log("Loading initial tickets...");
   // Load initial tickets
   loadTickets();
 
@@ -19,7 +17,6 @@ function initializeTickets() {
 }
 
 function setupEventListeners() {
-  console.log("Setting up event listeners...");
   // Search functionality
   const searchInput = document.getElementById("ticketSearch");
   if (searchInput) {
