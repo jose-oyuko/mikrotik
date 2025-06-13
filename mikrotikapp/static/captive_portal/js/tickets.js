@@ -58,6 +58,9 @@ function handleTicketLogin(event) {
 
       if (res.ok) {
         displayMessage(data.message || "Login successful!", "success");
+        await sleep(3000);
+        clearMessage();
+        window.location.href = "www.google.com";
       } else {
         displayMessage(
           data.message || "Login failed. Please try again.",

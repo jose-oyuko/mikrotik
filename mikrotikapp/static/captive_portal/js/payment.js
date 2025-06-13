@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
             data.message || "You will receive an mpesa prompt shortly.",
             "success"
           );
+          startSessionCheck(data.macAddress);
         } else {
           showResult(
             "Payment Error",
@@ -83,3 +84,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+// Function to start session check
+function startSessionCheck(macAddress) {
+  console.log("Starting session check with MAC:", macAddress);
+  console.log("MAC address type:", typeof macAddress);
+
+  if (!macAddress) {
+    console.error("MAC address is undefined or empty");
+    return;
+  }
+
+  const eventSource = new EventSource(`/api/payment-status/${macAddress}/`);
+
+  eventSource.onmessage = function (event) {
+    console.log("Received SSE message:", event.data);
+    const data = JSON.parse(event.data);
+    if (data.status === "success") {
+      console.log("Session check successful, redirecting to:", data.link_orig);
+      eventSource.close();
+      window.location.href = data.link_orig;
+    }
+  };
+
+  eventSource.onerror = function (error) {
+    console.error("EventSource failed:", error);
+    eventSource.close();
+  };
+}

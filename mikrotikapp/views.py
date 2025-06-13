@@ -176,7 +176,7 @@ class TicketValidation(APIView):
         
 
 class TicketsView(generics.ListCreateAPIView):
-    queryset = Tickets.objects.all()
+    queryset = Tickets.objects.all().order_by("-created_at")
     serializer_class = TicketsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
