@@ -5,9 +5,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
+    path('api/confirm_executed_command/', views.confirm_executed_commands, name='confirm_executed_command'),
     path('2/', views.packages_2, name='packages_2' ),
     path('api/sessions/active', views.ActiveSessions.as_view(), name='active-sessions'),
-    path('api/pending/', views.PendingPaymentClass.as_view(), name='pending-payment'),
+    path('api/pending/', csrf_exempt(views.PendingPaymentClass.as_view()), name='pending-payment'),
     path('api/payed/', views.PayedTransactions.as_view(), name='payed-transactions'),
     path('api/packages/', views.PackegesList.as_view(), name='packages-list'),
     path('api/packages/<int:pk>/', views.PackegesDetail.as_view(), name='packages-detail'),
@@ -25,7 +26,7 @@ urlpatterns = [
     path('api/commands/status/', views.report_status, name='report-status'),
     path('api/tickets/', views.TicketsView.as_view(), name='tickets-view'),
     path('api/tickets/<int:pk>/', views.TicketsDetail.as_view(), name='tickets-detail'),
-    path('api/tickets/validate/', views.TicketValidation.as_view(), name='ticket-validation'),
+    path('api/tickets/validate/', csrf_exempt(views.TicketValidation.as_view()), name='ticket-validation'),
     path('api/payed_date_range/', views.PayedTransactionsByDate.as_view(), name='payed-transactions-by-date'),
     path('api/actve_sessions_date_range/', views.ActiveSessionsByDateReange.as_view(), name='active-sessions-by-date'),
 ]

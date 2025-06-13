@@ -33,6 +33,30 @@ from datetime import datetime, time
 from django.utils.decorators import method_decorator
 from django.utils.dateparse import parse_date
 
+@csrf_exempt
+@require_http_methods(["GET"])
+def confirm_executed_commands(request):
+    ids = request.GET.getlist('id')
+    not_executed = []
+
+    for id in ids:
+        command = Commands.objects.filter(id=id).first()
+        logger.debug(f"Confirming command with ID: {id}")
+
+        if not command or not command.executed:
+            not_executed.append(id)
+
+    if not_executed:
+        return JsonResponse({
+            'message': f'Commands not executed or not found: {", ".join(not_executed)}',
+            'executed': False
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    return JsonResponse({
+        'message': 'All commands already executed',
+        'executed': True
+    }, status=status.HTTP_200_OK)
+
 
 class ActiveSessionsByDateReange(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -106,8 +130,7 @@ class PayedTransactionsByDate(APIView):
             'transactions': list(transactions),
             'total_amount': total_amount
         })
-    
-@method_decorator(csrf_exempt, name='dispatch')
+
 class TicketValidation(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -246,6 +269,8 @@ def report_status(request):
     except Exception as e:
         logger.error(f"Error reporting status: {str(e)}")
         return JsonResponse({'error': 'Failed to report status'}, status=500)
+    
+
 class PendingPaymentClass(generics.CreateAPIView):
     queryset = PendingPayment.objects.all()
     serializer_class = PendingPaymentSerializer
@@ -540,7 +565,7 @@ def packages(request):
         command.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
         command.login(mac=user_data['mac'], ip=user_data['ip'], time=session['time_remaining'])
     
-    packages = Packages.objects.all()
+    packages = Packages.objects.all().order_by("price")
 
     context = {
         'packages': packages,
