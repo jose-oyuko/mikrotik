@@ -32,7 +32,20 @@ function initializeTickets() {
   }
 }
 
-// ✅ Add this sleep function (returns a Promise)
+function getCSRFToken() {
+  const name = "csrftoken";
+  const cookies = document.cookie.split(";");
+  for (let i = 0; i < cookies.length; i++) {
+    let cookie = cookies[i].trim();
+    // Does this cookie string begin with the name we want?
+    if (cookie.startsWith(name + "=")) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return null;
+}
+
+//  Add this sleep function (returns a Promise)
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -40,6 +53,7 @@ function sleep(ms) {
 async function handleTicketLogin(event) {
   event.preventDefault();
   const formData = new FormData(event.target);
+  const csrfToken = getCSRFToken();
   const ticketData = {
     username: formData.get("ticketUsername"),
     password: formData.get("ticketPassword"),
@@ -56,6 +70,7 @@ async function handleTicketLogin(event) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
       },
       body: JSON.stringify(ticketData),
     });

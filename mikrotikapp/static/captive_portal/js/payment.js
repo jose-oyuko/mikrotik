@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Sending payment request...");
     console.log("Price:", currentPrice);
     console.log("Phone:", phone);
+    const csrfToken = getCSRFToken();
 
     const pending_payment_url = "/api/pending/";
     const pending_payment_data = {
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
       },
       body: JSON.stringify(pending_payment_data),
     })
@@ -84,6 +86,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+function getCSRFToken() {
+  const name = "csrftoken";
+  const cookies = document.cookie.split(";");
+  for (let i = 0; i < cookies.length; i++) {
+    let cookie = cookies[i].trim();
+    // Does this cookie string begin with the name we want?
+    if (cookie.startsWith(name + "=")) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return null;
+}
 
 // Function to start session check
 function startSessionCheck(macAddress) {
