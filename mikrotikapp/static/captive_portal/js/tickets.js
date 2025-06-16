@@ -10,8 +10,8 @@ function toggleLoading(show) {
   }
 }
 
-// display messages
-function displayMessage(message, type = "infor") {
+// Display messages
+function displayMessage(message, type = "info") {
   const messageBox = document.getElementById("responseMessage");
   if (messageBox) {
     messageBox.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
@@ -32,7 +32,12 @@ function initializeTickets() {
   }
 }
 
-function handleTicketLogin(event) {
+// ✅ Add this sleep function (returns a Promise)
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function handleTicketLogin(event) {
   event.preventDefault();
   const formData = new FormData(event.target);
   const ticketData = {
@@ -45,32 +50,35 @@ function handleTicketLogin(event) {
   console.log("Sending ticket validation request:", ticketData);
   toggleLoading(true);
   clearMessage();
-  fetch("/api/tickets/validate/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(ticketData),
-  })
-    .then(async (res) => {
-      toggleLoading(false);
-      const data = await res.json();
 
-      if (res.ok) {
-        displayMessage(data.message || "Login successful!", "success");
-        await sleep(3000);
-        clearMessage();
-        window.location.href = "www.google.com";
-      } else {
-        displayMessage(
-          data.message || "Login failed. Please try again.",
-          "danger"
-        );
-      }
-    })
-    .catch((err) => {
-      toggleLoading(false);
-      console.error("Login error:", err);
-      displayMessage("Something went wrong. Please try again later.", "danger");
+  try {
+    const res = await fetch("/api/tickets/validate/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(ticketData),
     });
+
+    toggleLoading(false);
+    const data = await res.json();
+
+    if (res.ok) {
+      displayMessage(data.message || "Login successful!", "success");
+      await sleep(3000);
+      clearMessage();
+      // ✅ Ensure full URL with protocol
+      window.location.href = "https://www.google.com";
+    } else {
+      console.log("Login failed:", data);
+      displayMessage(
+        data.message || "Login failed. Please try again.",
+        "danger"
+      );
+    }
+  } catch (err) {
+    toggleLoading(false);
+    console.error("Login error:", err);
+    displayMessage("Something went wrong. Please try again later.", "danger");
+  }
 }
