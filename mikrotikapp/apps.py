@@ -10,4 +10,4 @@ class MikrotikappConfig(AppConfig):
         """
         Initialize logging when Django starts
         """
-        setup_logging()
+        # setup_logging()

@@ -68,11 +68,15 @@ def get_network_settings():
         'dns_servers': settings.NETWORK['DNS_SERVERS'],
     }
 
+_logger_configured = False
 def setup_logging():
     """
     Configure logging based on environment variables.
     This function should be called when the application starts.
     """
+    global _logger_configured
+    if _logger_configured:
+        return logger  # Return existing logger if already configured
     # Create logs directory if it doesn't exist
     log_dir = os.path.join(settings.BASE_DIR, 'logs')
     if not os.path.exists(log_dir):
@@ -103,4 +107,5 @@ def setup_logging():
         )
 
     logger.info("Logging system initialized successfully")
+    _logger_configured = True
     return logger 
