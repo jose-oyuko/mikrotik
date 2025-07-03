@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/tickets/validate/', csrf_exempt(views.TicketValidation.as_view()), name='ticket-validation'),
     path('api/payed_date_range/', views.PayedTransactionsByDate.as_view(), name='payed-transactions-by-date'),
     path('api/actve_sessions_date_range/', views.ActiveSessionsByDateReange.as_view(), name='active-sessions-by-date'),
+    path('api/mpesa_code/', views.MpesaCodeLogin.as_view(), name='mpesa-code'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

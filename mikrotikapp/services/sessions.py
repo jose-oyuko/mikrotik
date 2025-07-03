@@ -6,7 +6,7 @@ from mikrotikapp.models import sessions
 from loguru import logger
 
 class SessionsService():
-    def add_session(self, mac_address, phone_number, period, package_amount):
+    def add_session(self, mac_address, phone_number, period, package_amount, mpesa_code=None):
         logger.info(f"Attempting to add/update session - MAC: {mac_address}, Phone: {phone_number}, Period: {period} minutes, Amount: {package_amount}")
 
         # Use timezone.now() to ensure timezone awareness

@@ -67,6 +67,7 @@ class sessions(models.Model):
     end_time = models.DateTimeField(null=False, blank=False)
     phone_number = LastNineDigitsPhoneField(max_length=9)
     period = models.CharField(max_length=15)
+    mpesa_code = models.CharField(max_length=20, null=True, blank=True, unique=True)
 
 
 class Commands(models.Model):

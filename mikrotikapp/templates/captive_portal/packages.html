@@ -22,9 +22,18 @@
           <a href="http://munialo.net/status">munialo.net</a> to check status
         </p> -->
         <p class="lead">Select a package to continue or Login with Ticket</p>
+        <button class="btn btn-outline-info" id="not_connecting_button">
+          Payed But Not Connecting?
+        </button>
       </div>
       <!-- Response message -->
       <div id="responseMessage" class="mt-3"></div>
+      <!-- message -->
+       {% if time_remaining.time_remaining %}
+       <div class="alert alert-info" role="alert">
+        Session found!, time remaining is {{ time_remaining.time_remaining }}
+       </div>
+       {% endif %}
       <!-- Tabs -->
       <ul class="nav nav-tabs mb-4" id="internetTab" role="tablist">
         <li class="nav-item" role="presentation">
@@ -59,7 +68,7 @@
           <div class="row justify-content-center">
             <!-- Package 1 -->
             {% for package in packages %}
-            <div class="col-md-6 col-lg-4">
+            <div class="col-auto">
               <div class="card shadow-sm mb-4">
                 <div class="card-body text-center">
                   <h5 class="card-title">Price: Ksh {{ package.price }}</h5>
@@ -78,23 +87,7 @@
               </div>
             </div>
             {% endfor %}
-            <!-- Package 2 -->
-            <div class="col-md-6 col-lg-4">
-              <div class="card shadow-sm mb-4">
-                <div class="card-body text-center">
-                  <h5 class="card-title">Price: Ksh 10</h5>
-                  <p class="card-text">Duration: 10 minutes</p>
-                  <button
-                    class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#paymentModal"
-                    data-price="10"
-                  >
-                    Buy
-                  </button>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
 
@@ -201,7 +194,7 @@
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary w-100">
                 Proceed to Pay
-              </button>
+              </button> 
             </div>
           </form>
         </div>
@@ -247,8 +240,65 @@
       </div>
     </div>
 
+    <!-- not connecting modal -->
+    <div
+      class="modal fade"
+      id="notConnectingModal"
+      tabindex="-1"
+      aria-labelledby="notConnectingModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="notConnectingForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="paymentModalLabel">
+                Enter Mpesa Code Below
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="mpesaCode" class="form-label"
+                  >Enter M-Pesa Message Code</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="mpesaCode"
+                  name="mpesaCode"
+                />
+                <input
+                  type="hidden"
+                  id="notConnectingMacAddress"
+                  name="macAddress"
+                  value="{{ user_data.mac }}"
+                />
+                <input
+                  type="hidden"
+                  id="notConnectingIpAddress"
+                  name="ipAddress"
+                  value="{{ user_data.ip }}"
+                />
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary w-100">
+                Submit
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'captive_portal/js/payment.js' %}"></script>
     <script src="{% static 'captive_portal/js/tickets.js' %}"></script>
+    <script src="{% static 'captive_portal/js/not_connecting.js' %}"></script>
   </body>
 </html>

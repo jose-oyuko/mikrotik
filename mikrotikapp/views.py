@@ -33,6 +33,30 @@ from datetime import datetime, time
 from django.utils.decorators import method_decorator
 from django.utils.dateparse import parse_date
 
+class MpesaCodeLogin(APIView):
+    def post(self, request):
+        mac_address = request.data.get('mac_address')
+        mpesa_code = request.data.get('mpesa_code')
+        ip_address = request.data.get('ip_address')
+        
+        active_session = sessions.objects.filter(mpesa_code=mpesa_code).first()
+        if not active_session:
+            return Response({'error': 'Invalid or expired M-Pesa code'}, status=status.HTTP_400_BAD_REQUEST)
+        current_time = timezone.now()
+        if active_session.end_time < current_time:
+            logger.debug(f"Session for MAC {active_session.mac_address} has expired at {active_session.end_time}. Current time is {current_time}.")
+            active_session.delete()
+            return Response({'error': 'Session has expired'}, status=status.HTTP_400_BAD_REQUEST)
+        if active_session.mac_address != mac_address:
+            active_session.mac_address = mac_address
+            active_session.save()
+        session_service = SessionsService()
+        check_session = session_service.check_session(mac_address=mac_address)
+        command_serivce = CommandsServices()
+        command_serivce.add_user(username=check_session['mac_address'], password=check_session['mac_address'], time=check_session['time_remaining'])
+        command_serivce.login(mac=check_session['mac_address'], ip=ip_address, time=check_session['time_remaining'])
+        return Response({"message": f"You will be logged, time remaining is {check_session['time_remaining']}"}, status=status.HTTP_200_OK)
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def confirm_executed_commands(request):
@@ -420,8 +444,8 @@ class PayedTransactions(generics.CreateAPIView):
 
             self.perform_create(serializer)
             # pop pending, login the user
-            self.check_pending(processed_phone, transaction_data['amount'])
-            logger.info(f"Payment transaction processed successfully: {transaction_data['reference']}")
+            self.check_pending(processed_phone, transaction_data['amount'], transaction_data['reference'])
+            # logger.info(f"Payment transaction processed successfully: {transaction_data['reference']}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -431,7 +455,7 @@ class PayedTransactions(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-    def check_pending(self, phone_number, amount):
+    def check_pending(self, phone_number, amount, mpesa_code):
         try:
             # Check if there's a pending payment for this phone number and amount
             amount = int(float(amount))
@@ -462,7 +486,8 @@ class PayedTransactions(generics.CreateAPIView):
                 mac_address=pending_payment.macAddress,
                 phone_number=phone_number,
                 period=package.period_in_minutes,
-                package_amount=amount
+                package_amount=amount,
+                mpesa_code=mpesa_code,
             )
             logger.info(f"Added session for phone: {phone_number}")
 
@@ -541,7 +566,7 @@ def packages_2(request):
     return render(request,'captive_portal/packages.html')
 
 @csrf_exempt
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def packages(request):
     # get form data
     user_data = {
@@ -552,10 +577,19 @@ def packages(request):
     "link_login_only" : request.POST.get("link-login-only"),
     "link_orig" : request.POST.get("link-orig"),
     }
+    user_data_test = {
+    "mac" : "00:11:22:33:44:55",
+    "ip" : "192.168.88.168",
+    "username" : "username",
+    "link_login" : "link-login",
+    "link_login_only" : "link-login-only",
+    "link_orig" : "link-orig",
+    }
     # check if session exists
     print(f"the mac address is {user_data['mac']}")
     session_service = SessionsService()
     session = session_service.check_session(mac_address=user_data['mac'])
+    time_remaining = ""
     if session:
         # mikrotik = Mikrotik()
         # mikrotik.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
@@ -564,12 +598,13 @@ def packages(request):
         command = CommandsServices()
         command.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
         command.login(mac=user_data['mac'], ip=user_data['ip'], time=session['time_remaining'])
+        time_remaining = session['time_remaining']
     
     packages = Packages.objects.all().order_by("price")
-
     context = {
+        'time_remaining': {"time_remaining": time_remaining},
         'packages': packages,
-        'user_data': user_data
+        'user_data': user_data_test,  # Use test data for debugging
     }
     return render(request, 'captive_portal/packages.html', context)
 

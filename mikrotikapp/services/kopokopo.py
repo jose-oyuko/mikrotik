@@ -35,13 +35,15 @@ class Kopokopo:
             logger.info(f"Initializing STK push for amount: {amount}, phone: {phone_number}")
             k2connect.initialize(CLIENT_ID, CLIENT_SECRET, BASE_URL)
             stk_service = k2connect.ReceivePayments
+            phone_number = phone_number[-9:]
 
             # Format phone number to include +254
-            if not phone_number.startswith('+254'):
-                if phone_number.startswith('0'):
-                    phone_number = '+254' + phone_number[1:]
-                else:
-                    phone_number = '+254' + phone_number
+            # if not phone_number.startswith('+254'):
+            #     if phone_number.startswith('0'):
+            #         phone_number = '+254' + phone_number[1:]
+            #     else:
+            #         phone_number = '+254' + phone_number
+            phone_number = '+254' + phone_number
 
             request_body = {
                 "access_token": self.authorization(),
