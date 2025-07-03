@@ -566,7 +566,7 @@ def packages_2(request):
     return render(request,'captive_portal/packages.html')
 
 @csrf_exempt
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def packages(request):
     # get form data
     user_data = {
@@ -604,7 +604,7 @@ def packages(request):
     context = {
         'time_remaining': {"time_remaining": time_remaining},
         'packages': packages,
-        'user_data': user_data_test,  # Use test data for debugging
+        'user_data': user_data,  # Use test data for debugging
     }
     return render(request, 'captive_portal/packages.html', context)
 
