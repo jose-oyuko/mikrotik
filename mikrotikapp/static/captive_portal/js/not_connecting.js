@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       const response_data = await response.json();
-      if (response_data.ok) {
+      if (response.ok) {
         console.log(response_data);
 
         displayMessage(

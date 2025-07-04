@@ -589,7 +589,7 @@ def packages(request):
     "link_orig" : "link-orig",
     }
     # check if session exists
-    print(f"the mac address is {user_data['mac']}")
+    # print(f"the mac address is {user_data['mac']}")
     session_service = SessionsService()
     session = session_service.check_session(mac_address=user_data['mac'])
     time_remaining = ""
