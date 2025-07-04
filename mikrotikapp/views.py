@@ -47,12 +47,15 @@ class MpesaCodeLogin(APIView):
             logger.debug(f"Session for MAC {active_session.mac_address} has expired at {active_session.end_time}. Current time is {current_time}.")
             active_session.delete()
             return Response({'error': 'Session has expired'}, status=status.HTTP_400_BAD_REQUEST)
-        if active_session.mac_address != mac_address:
+        current_mac_address = active_session.mac_address
+        if current_mac_address != mac_address:
             active_session.mac_address = mac_address
             active_session.save()
+        logger.info(f"Logging in user with MAC: {mac_address} using M-Pesa code: {mpesa_code}, removing user with MAC: {current_mac_address}")
         session_service = SessionsService()
         check_session = session_service.check_session(mac_address=mac_address)
         command_serivce = CommandsServices()
+        command_serivce.logout_user(mac=current_mac_address)
         command_serivce.add_user(username=check_session['mac_address'], password=check_session['mac_address'], time=check_session['time_remaining'])
         command_serivce.login(mac=check_session['mac_address'], ip=ip_address, time=check_session['time_remaining'])
         return Response({"message": f"You will be logged, time remaining is {check_session['time_remaining']}"}, status=status.HTTP_200_OK)
@@ -146,7 +149,7 @@ class PayedTransactionsByDate(APIView):
         transactions = PayedTransaction.objects.filter(
             origination_time__range=(start_datetime, end_datetime)
         ).values(
-            'origination_time', 'amount', 'sender_phone_number', 'sender_first_name'
+            'origination_time', 'amount', 'sender_phone_number', 'reference'
         ).order_by('-origination_time')
         total_amount = transactions.aggregate(total=Sum('amount'))['total'] or 0
         logger.info(f"Retrieved {len(transactions)} transactions from {start_date} to {end_date} with total amount: {total_amount}")

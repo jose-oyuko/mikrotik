@@ -35,7 +35,8 @@ class SessionsService():
                 "starting_time": current_time, # Explicitly set starting_time for new session
                 "end_time": end_time,
                 "phone_number": phone_number,
-                "period": period
+                "period": period,
+                "mpesa_code": mpesa_code if mpesa_code else None
             }
 
             logger.debug(f"New session data prepared: {session_data}")
