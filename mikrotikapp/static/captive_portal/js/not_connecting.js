@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         sleep(3000).then(() => {
           clearMessage();
+          setTimeout(() => {
+            window.location.href = "https://www.google.com";
+          }, 5000);
         });
       } else {
         console.error("Error:", response_data.error);

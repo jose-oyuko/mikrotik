@@ -30,7 +30,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.utils.timezone import make_aware
 from datetime import datetime, time
-from django.utils.decorators import method_decorator
+# from django.http import HttpResponseRedirect
 from django.utils.dateparse import parse_date
 
 class MpesaCodeLogin(APIView):
@@ -602,6 +602,7 @@ def packages(request):
         command.add_user(username=session['mac_address'], password=session['mac_address'], time=session['time_remaining'])
         command.login(mac=user_data['mac'], ip=user_data['ip'], time=session['time_remaining'])
         time_remaining = session['time_remaining']
+        # return HttpResponseRedirect("https://www.google.com")
     
     packages = Packages.objects.all().order_by("price")
     context = {
