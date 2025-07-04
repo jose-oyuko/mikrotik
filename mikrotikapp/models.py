@@ -76,6 +76,7 @@ class Commands(models.Model):
         ('login_user', 'Login User'),
         ('remove_user', 'Remove User'),
         ('update_user', 'Update User'),
+        ('logout_user', 'Logout User'),
     ]
     comand_type = models.CharField(max_length=50, choices=COMMAND_TYPES)
     params = models.JSONField()
